@@ -19,6 +19,7 @@ return new class extends Migration
             $table->float('amount');
             $table->integer('transaction_id');
             $table->foreignId('order_id')->constrained('orders')->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
         });
     }
 

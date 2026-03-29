@@ -10,12 +10,20 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password'])]
-#[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
+
+
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+        'role'
+    ];
+
+    protected $hidden = ['password','remember_token'];
 
     /**
      * Get the attributes that should be cast.
@@ -28,5 +36,40 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function payouts()
+    {
+        return $this->hasMany(Payout::class);
+    }
+
+    public function shops()
+    {
+        return $this->hasOne(Shop::class);
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    public function cart()
+    {
+        return $this->hasOne(Cart::class);
+    }
+
+    public function orders()
+    {
+        return $this->hasMAny(Order::class);
+    }
+
+    public function payements()
+    {
+        return $this->hasMany(Payement::class);
+    }
+
+    public function dispute()
+    {
+        return $this->hasMany(Dispute::class);
     }
 }

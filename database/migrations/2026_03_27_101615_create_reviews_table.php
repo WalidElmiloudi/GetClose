@@ -17,6 +17,7 @@ return new class extends Migration
             $table->float('rating');
             $table->string('comment');
             $table->foreignId('product_id')->constrained('products')->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
         });
     }
 

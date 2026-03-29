@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('reason');
             $table->enum('status',['open','under_review','waiting_vendor','waiting_customer','resolved','refunded','rejected','closed'])->default('open');
             $table->foreignId('order_id')->constrained('orders')->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
         });
     }
 

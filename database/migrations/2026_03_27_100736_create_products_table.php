@@ -20,6 +20,8 @@ return new class extends Migration
             $table->integer('quantity');
             $table->enum('status',['active','inactive'])->default('active');
             $table->json('images')->nullable();
+            $table->foreignId('category_id')->constrained('categories')->cascadeOnDelete();
+            $table->foreignId('shop_id')->constrained('shops')->cascadeOnDelete();
         });
     }
 
