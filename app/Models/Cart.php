@@ -15,7 +15,7 @@ class Cart extends Model
         return $this->belongsTo(User::class,'client_id');
     }
 
-    public function cartItems()
+    public function items()
     {
         return $this->hasMany(CartItem::class);
     }
