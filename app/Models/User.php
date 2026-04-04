@@ -23,7 +23,7 @@ class User extends Authenticatable
         'role'
     ];
 
-    protected $hidden = ['password','remember_token'];
+    protected $hidden = ['password', 'remember_token'];
 
     /**
      * Get the attributes that should be cast.
@@ -43,7 +43,7 @@ class User extends Authenticatable
         return $this->hasMany(Payout::class);
     }
 
-    public function shops()
+    public function shop()
     {
         return $this->hasOne(Shop::class);
     }
