@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->timestamps();
             $table->float('total_price');
-            $table->float('shipping_fee');
             $table->enum('status',['pending','paid','processing','partialy_shipped','shipped','completed','cancelled','refunded'])->default('pending');
             $table->foreignId('client_id')->constrained('users')->cascadeOnDelete();
         });

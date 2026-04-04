@@ -17,6 +17,7 @@ return new class extends Migration
             $table->integer('quantity');
             $table->float('price');
             $table->foreignId('order_id')->constrained('orders')->cascadeOnDelete();
+            $table->foreignId('product_id')->constrained('products')->cascadeOnDelete();
         });
     }
 
