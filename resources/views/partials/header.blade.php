@@ -14,11 +14,11 @@
         </form>
       </div>
       <div class="hidden lg:flex col-span-1 items-center">
-        <a href="login.html"
+        <a href="{{ route('login') }}"
           class="h-[90%] w-[50%] bg-red-700 rounded-tl-full rounded-bl-full flex justify-center items-center text-xl font-bold text-white hover:bg-red-900 cursor-pointer">
           Login
         </a>
-        <a href="register.html"
+        <a href="{{ route('register') }}"
           class="h-[90%] w-[50%] border-4 border-red-700 rounded-tr-full rounded-br-full flex justify-center items-center text-xl font-bold text-red-700 hover:text-red-900 cursor-pointer">
           Sign up
         </a>
