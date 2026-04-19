@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+.group1{
+  padding-left: 1rem;
+  animation: carousel 15s infinite linear;
+}
+
+.group2{
+  padding-left: 1rem;
+  animation: carousel 15s infinite linear;
+}
+
+
+@keyframes carousel{
+  from {translate: 0%;}
+  to {translate: -100%;}
+}
+
+.arrow:hover{
+  animation: open 0.2s linear;
+  animation-fill-mode: forwards;
+}
+
+.arrow:hover .label{
+  display: block;
+}
+
+@keyframes open{
+  from {width: 40px;}
+  to {width: 180px}
+}

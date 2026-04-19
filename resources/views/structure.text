@@ -1,0 +1,15 @@
+resources/views/
+├── layouts/               # Base structure for different areas
+│   ├── app.blade.php      # Main application layout
+│   └── guest.blade.php    # Layout for unauthenticated users
+├── components/            # Reusable UI widgets (cards, buttons, etc.)
+│   ├── alert.blade.php
+│   └── post-card.blade.php
+├── posts/                 # Views specifically for the "Post" resource
+│   ├── index.blade.php    # List all posts
+│   ├── create.blade.php   # Show form for new post
+│   ├── edit.blade.php     # Show form to edit existing post
+│   └── show.blade.php     # Show a single post
+└── partials/              # Shared sub-views (optional)
+    ├── _navbar.blade.php
+    └── _footer.blade.php
