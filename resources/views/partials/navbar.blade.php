@@ -23,7 +23,7 @@
           <a href="#"
               class="flex justify-center items-center rounded-full m-2 text-2xl font-bold hover:bg-red-400 hover:text-white ease-in-out duration-150">Shops</a>
           <a href="#"
-              class="flex justify-center items-center rounded-full m-2 text-2xl font-bold hover:bg-red-400 hover:text-white ease-in-out duration-150">Product</a>
+              class="flex justify-center items-center rounded-full m-2 text-2xl font-bold hover:bg-red-400 hover:text-white ease-in-out duration-150">Products</a>
           <a href="#"
               class="flex justify-center items-center rounded-full m-2 text-2xl font-bold hover:bg-red-400 hover:text-white ease-in-out duration-150">Cart</a>
           <a href="#"
