@@ -11,10 +11,10 @@
             <h3 class="text-3xl text-black font-bold lg:text-5xl lg:w-150 2xl:text-6xl 2xl:w-300">High quality local
                 vendors at your fingertips.</h3>
             <div class="w-full mt-3 lg:mt-10 gap-2 lg:gap-4 flex">
-                <a href="#"
+                <a href="{{ route('shops') }}"
                     class="text-xl lg:text-3xl 2xl:text-4xl font-bold px-4 py-2 2xl:py-4 2xl:px-6 bg-red-500 text-white rounded-full hover:bg-red-700 ease-in-out duration-150 hover:scale-110">Browse
                     Shops</a>
-                <a href="#"
+                <a href="{{ route('products') }}"
                     class="text-xl lg:text-3xl 2xl:text-4xl font-bold px-2 py-2 2xl:py-4 2xl:px-6 border-4 border-red-500 rounded-full text-red-500 hover:bg-red-500 hover:text-white ease-in-out duration-150 hover:scale-105">Explore
                     Products</a>
             </div>

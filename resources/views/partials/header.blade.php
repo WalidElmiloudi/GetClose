@@ -5,9 +5,9 @@
             <h1 class="hidden lg:block text-red-700 font-bold text-4xl font-[Open_Sans]">GetClose.</h1>
         </div>
         <div class="col-span-3 h-full w-full flex items-center justify-center lg:col-span-4">
-            <form class="h-[90%] w-[95%] flex items-center gap-2">
+            <form class="h-[90%] w-[95%] flex items-center gap-2" action="{{ route('search') }}" method="GET">
                 <input class="bg-gray-100 h-[85%] w-[90%] rounded-full p-4 text-lg focus:bg-gray-200 lg:text-2xl"
-                    type="search" placeholder="Search..." required>
+                    type="search" name="q" placeholder="Search products..." value="{{ request('q') }}" required>
                 <button
                     class="bg-red-500 h-11 w-11 rounded-full cursor-pointer flex justify-center items-center hover:bg-red-700"
                     type="submit"><i class="fa-solid fa-magnifying-glass text-white text-lg"></i></button>
@@ -27,10 +27,16 @@
         @else
             <div class="hidden lg:flex col-span-1 items-center gap-4">
                 <h1 class="hidden lg:block font-bold text-lg">{{auth()->user()->name}}</h1>
-                <a href="{{ route('logout') }}"
-                    class="h-[90%] w-[50%] border-4 border-red-700 rounded-full rounded-br-full flex justify-center items-center text-xl font-bold text-red-700 hover:bg-red-700 hover:text-white ease-in-out duration-150 cursor-pointer">
-                    logout
-                </a>
+                @if(auth()->user()->role === 'vendor')
+                    <a href="{{ route('vendor.dashboard') }}" class="text-sm text-red-600 hover:text-red-900 font-semibold">Dashboard</a>
+                @endif
+                <form method="POST" action="{{ route('logout') }}" class="h-[90%] w-[50%]">
+                    @csrf
+                    <button type="submit"
+                        class="h-full w-full border-4 border-red-700 rounded-full rounded-br-full flex justify-center items-center text-xl font-bold text-red-700 hover:bg-red-700 hover:text-white ease-in-out duration-150 cursor-pointer">
+                        logout
+                    </button>
+                </form>
             </div>
         @endif
     </div>

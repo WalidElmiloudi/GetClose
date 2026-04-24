@@ -1,41 +1,137 @@
 @extends('layouts.app')
 @section('page', 'PROFILE')
 @section('content')
-        <main class="h-full lg:h-[calc(100vh-80px)] 2xl:h-[calc(100vh-160px)] flex justify-center items-center">
-            <section
-                class="h-[calc(100vh-160px)] w-full lg:h-[calc(100vh-160px)] 2xl:h-160 2xl:w-140 lg:w-120 flex flex-col items-center justify-around lg:justify-between shadow-2xl bg-white rounded-2xl">
-                <div class="h-30 w-full bg-red-400/10 relative rounded-t-2xl">
-                    <div
-                        class="h-30 w-30 bg-red-300 rounded-full absolute -bottom-[45%] left-[32%] lg:left-[38%] flex justify-center items-center">
-                        <h1 class="text-white font-bold text-6xl">{{ucfirst($user['name'][0])}}</h1>
+<main class="min-h-screen bg-gradient-to-b from-red-50 to-white py-10 px-4 lg:px-30">
+    <div class="max-w-4xl mx-auto">
+        <!-- Profile Header -->
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-8">
+            <div class="h-32 bg-gradient-to-r from-red-400 to-red-600 relative">
+                <div class="absolute -bottom-16 left-8">
+                    <div class="h-32 w-32 bg-red-300 rounded-full flex items-center justify-center border-4 border-white shadow-lg">
+                        <h1 class="text-white font-bold text-5xl">{{ ucfirst(substr($user->name, 0, 1)) }}</h1>
                     </div>
                 </div>
-                <div class="w-[90%] h-60 mt-15 rounded-lg bg-red-50 shadow-xl flex flex-col p-4 justify-around">
-                    <div class="w-full flex justify-between items-center">
-                        <h1 class="text-xl font-bold">Name :</h1>
-                        <h2 class="text-lg font-bold">{{$user['name']}}</h2>
-                        <button type="button"
-                            class="py-1 px-2 rounded-sm bg-green-400 text-white font-bold cursor-pointer hover:bg-green-500 ease-in-out duration-150">EDIT</button>
-                    </div>
-                    <div class="w-full flex justify-between items-center">
-                        <h1 class="text-xl font-bold">Email :</h1>
-                        <h2 class="text-lg font-bold">{{$user['email']}}</h2>
-                        <button type="button"
-                            class="py-1 px-2 rounded-sm bg-green-400 text-white font-bold cursor-pointer hover:bg-green-500 ease-in-out duration-150">EDIT</button>
-                    </div>
-                    <div class="w-full flex gap-4 items-center">
-                        <h1 class="text-xl font-bold">Role :</h1>
-                        <h2 class="text-lg font-bold">{{ucfirst($user['role'])}}</h2>
-                    </div>
-                    <button
-                        class="py-1 px-2 bg-green-400 text-2xl font-bold text-white rounded-md cursor-pointer hover:bg-green-500 ease-in-out duration-150">Change
-                        Password</button>
+            </div>
+            <div class="pt-20 pb-8 px-8">
+                <h1 class="text-3xl font-bold text-gray-800">{{ $user->name }}</h1>
+                <p class="text-gray-600 mt-2">{{ $user->email }}</p>
+                <span class="inline-block mt-3 px-4 py-2 rounded-full text-sm font-semibold bg-blue-100 text-blue-700">
+                    {{ ucfirst($user->role) }}
+                </span>
+            </div>
+        </div>
+
+        <!-- Profile Information -->
+        <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Profile Information</h2>
+            
+            @if (session('status') === 'profile-updated')
+                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-6">
+                    Profile updated successfully!
                 </div>
-                <a href="{{ route('logout') }}"
-                    class=" flex justify-center items-center lg:hidden py-2 px-2 bg-blue-300 w-[90%] text-3xl rounded-md text-white font-bold cursor-pointer hover:bg-blue-500 ease-in-out duration-150">Logout</a>
-                <a href=""
-                    class=" flex justify-center items-center py-2 px-2 bg-red-500 w-[90%] text-3xl rounded-md text-white font-bold mb-4 cursor-pointer hover:bg-red-900 ease-in-out duration-150">Delete
-                    Account</a>
-            </section>
-        </main>
+            @endif
+            
+            <form method="POST" action="{{ route('profile.update') }}" class="space-y-4">
+                @csrf
+                @method('PATCH')
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2" for="name">Name</label>
+                    <input class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" 
+                        type="text" name="name" value="{{ old('name', $user->name) }}" required>
+                    @error('name')
+                        <span class="text-red-500 text-sm mt-1">{{ $message }}</span>
+                    @enderror
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2" for="email">Email</label>
+                    <input class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" 
+                        type="email" name="email" value="{{ old('email', $user->email) }}" required>
+                    @error('email')
+                        <span class="text-red-500 text-sm mt-1">{{ $message }}</span>
+                    @enderror
+                </div>
+                
+                <button type="submit" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg transition-colors">
+                    Update Profile
+                </button>
+            </form>
+        </div>
+
+        <!-- Change Password Form -->
+        <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Change Password</h2>
+            @if (session('status') === 'password-updated')
+                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-6">
+                    Password updated successfully!
+                </div>
+            @endif
+            <form method="POST" action="{{ route('password.update') }}" class="space-y-4">
+                @csrf
+                @method('PUT')
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2" for="current_password">Current Password</label>
+                    <input class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" 
+                        type="password" name="current_password" required placeholder="Enter current password">
+                    @error('current_password', 'updatePassword')
+                        <span class="text-red-500 text-sm mt-1">{{ $message }}</span>
+                    @enderror
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2" for="password">New Password</label>
+                    <input class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" 
+                        type="password" name="password" required placeholder="Enter new password">
+                    @error('password', 'updatePassword')
+                        <span class="text-red-500 text-sm mt-1">{{ $message }}</span>
+                    @enderror
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2" for="password_confirmation">Confirm New Password</label>
+                    <input class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" 
+                        type="password" name="password_confirmation" required placeholder="Confirm new password">
+                </div>
+                
+                <button type="submit" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg transition-colors">
+                    Change Password
+                </button>
+            </form>
+        </div>
+
+        <!-- Delete Account Form -->
+        <div class="bg-red-50 rounded-xl shadow-lg p-8 mb-8 border-2 border-red-200">
+            <h2 class="text-2xl font-bold text-red-600 mb-4">Delete Account</h2>
+            <p class="text-gray-600 mb-6">Once your account is deleted, all of its resources and data will be permanently deleted. Please proceed with caution.</p>
+            <form method="POST" action="{{ route('profile.destroy') }}" 
+                onsubmit="return confirm('Are you sure you want to delete your account? This action cannot be undone.')">
+                @csrf
+                @method('DELETE')
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2" for="password">Confirm Password</label>
+                    <input class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" 
+                        type="password" name="password" required placeholder="Enter your password to confirm">
+                    @error('password', 'userDeletion')
+                        <span class="text-red-500 text-sm mt-1">{{ $message }}</span>
+                    @enderror
+                </div>
+                
+                <button type="submit" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg transition-colors">
+                    Delete Account
+                </button>
+            </form>
+        </div>
+
+        <!-- Logout Button (Mobile) -->
+        <form method="POST" action="{{ route('logout') }}" class="lg:hidden mb-8">
+            @csrf
+            <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 px-6 rounded-lg transition-colors text-xl">
+                Logout
+            </button>
+        </form>
+    </div>
+</main>
 @endsection
