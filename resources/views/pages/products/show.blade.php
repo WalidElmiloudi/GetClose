@@ -42,7 +42,7 @@
                 <!-- Product Info -->
                 <div>
                     <div class="mb-4">
-                        <a href="{{ route('shops.products', $product->shop) }}" class="text-red-500 hover:text-red-700 font-semibold">
+                        <a href="{{ route('shops.show', $product->shop) }}" class="text-red-500 hover:text-red-700 font-semibold">
                             {{ $product->shop->name }}
                         </a>
                         <span class="text-gray-400 mx-2">|</span>
