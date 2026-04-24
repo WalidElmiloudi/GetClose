@@ -15,7 +15,10 @@ return new class extends Migration
             $table->id();
             $table->timestamps();
             $table->string('name');
+            $table->text('description')->nullable();
             $table->float('price');
+            $table->integer('estimated_days')->nullable(); // Estimated delivery time in days
+            $table->boolean('is_active')->default(true);
         });
     }
 
