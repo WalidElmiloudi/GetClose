@@ -45,7 +45,7 @@ class User extends Authenticatable
 
     public function shop()
     {
-        return $this->hasOne(Shop::class);
+        return $this->hasOne(Shop::class, 'owner_id');
     }
 
     public function reviews()

@@ -15,8 +15,14 @@ return new class extends Migration
             $table->id();
             $table->timestamps();
             $table->float('total_price');
+            $table->float('shipping_price')->default(0);
             $table->enum('status',['pending','paid','processing','partialy_shipped','shipped','completed','cancelled','refunded'])->default('pending');
+            $table->string('shipping_address')->nullable();
+            $table->string('shipping_city')->nullable();
+            $table->string('shipping_zip')->nullable();
+            $table->string('payment_method')->nullable();
             $table->foreignId('client_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('shipping_method_id')->nullable()->constrained('shipping_methods')->nullOnDelete();
         });
     }
 
