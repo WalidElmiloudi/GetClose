@@ -27,9 +27,6 @@
         @else
             <div class="hidden lg:flex col-span-1 items-center gap-4">
                 <h1 class="hidden lg:block font-bold text-lg">{{auth()->user()->name}}</h1>
-                @if(auth()->user()->role === 'vendor')
-                    <a href="{{ route('vendor.dashboard') }}" class="text-sm text-red-600 hover:text-red-900 font-semibold">Dashboard</a>
-                @endif
                 <form method="POST" action="{{ route('logout') }}" class="h-[90%] w-[50%]">
                     @csrf
                     <button type="submit"
