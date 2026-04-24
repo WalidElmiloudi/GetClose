@@ -23,13 +23,21 @@ class CategoryController extends Controller
         $shop = $user->shop;
         
         if (!$shop) {
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => 'You need to create a shop first.'], 400);
+            }
             return redirect()->back()->with('error', 'You need to create a shop first.');
         }
         
         $data = $request->validated();
         $data['shop_id'] = $shop->id;
-        Category::create($data);
-        return redirect()->back();
+        $category = Category::create($data);
+        
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'category' => $category]);
+        }
+        
+        return redirect()->back()->with('success', 'Category created successfully.');
     }
 
     public function destroy(Category $category)

@@ -23,8 +23,8 @@ class StoreCategoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name'=>'required|string|25',
-            'description'=>'required|string|200',
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string|max:1000',
         ];
     }
 }
