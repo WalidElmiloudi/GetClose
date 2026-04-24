@@ -24,8 +24,8 @@ class StoreItemsRequest extends FormRequest
     {
         return [
             'quantity'=>'required|integer|min:1',
-            'price'=>'required|float',
-            'product_id'=>'required|integer'
+            'price'=>'required|numeric|min:0',
+            'product_id'=>'required|exists:products,id'
         ];
     }
 }
