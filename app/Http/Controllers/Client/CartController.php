@@ -14,9 +14,10 @@ class CartController extends Controller
 {
     public function index():View
     {
-        $cart = auth()->user()->cart();
+        $user = auth()->user();
+        $cart = $user->cart()->with('items.product')->first();
 
-        $items = $cart->items();
+        $items = $cart ? $cart->items : collect();
 
         return view('pages.client.cart',compact('items'));
     }
