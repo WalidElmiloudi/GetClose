@@ -26,7 +26,7 @@ class StoreShopRequest extends FormRequest
         return [
             'name' => 'required|string|max:50',
             'description' => 'required|string|max:500',
-            'logo' => 'required|image|mime:jpeg,png,jpg,webp|max:2048',
+            'logo' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
         ];
     }
 }

@@ -1,86 +1,119 @@
 <?php
 
-namespace App\Http\Controllers\Client;
+namespace App\Http\Controllers\Vendor;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use App\Models\Product;
-use App\Models\Review;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class ProductController extends Controller
 {
-    /**
-     * Display all products (public listing)
-     */
-    public function index(): View
+    public function index()
     {
-        $products = Product::where('status', 'active')
-            ->with(['shop.owner', 'category'])
+        $shop = auth()->user()->shop;
+        
+        if (!$shop) {
+            return redirect()->route('vendor.dashboard')->with('error', 'Create a shop first.');
+        }
+
+        $products = Product::where('shop_id', $shop->id)
+            ->with('category')
             ->latest()
             ->paginate(20);
 
-        return view('pages.products', compact('products'));
+        return view('pages.vendor.products', compact('products'));
     }
 
-    /**
-     * Display product detail page
-     */
-    public function show(Product $product): View
+    public function create(): View
     {
-        $product->load(['shop.owner', 'category', 'reviews.user']);
+        $shop = auth()->user()->shop;
+        $categories = Category::all();
         
-        // Calculate average rating
-        $averageRating = $product->reviews()->avg('rating');
-        $ratingBreakdown = [
-            5 => $product->reviews()->where('rating', 5)->count(),
-            4 => $product->reviews()->where('rating', 4)->count(),
-            3 => $product->reviews()->where('rating', 3)->count(),
-            2 => $product->reviews()->where('rating', 2)->count(),
-            1 => $product->reviews()->where('rating', 1)->count(),
-        ];
-        
-        // Get related products from same shop
-        $relatedProducts = Product::where('shop_id', $product->shop_id)
-            ->where('id', '!=', $product->id)
-            ->where('status', 'active')
-            ->limit(4)
-            ->get();
-        
-        return view('pages.products.show', compact(
-            'product',
-            'averageRating',
-            'ratingBreakdown',
-            'relatedProducts'
-        ));
+        return view('pages.vendor.products-create', compact('shop', 'categories'));
     }
 
-    /**
-     * Store a new review
-     */
-    public function storeReview(Request $request, Product $product)
+    public function store(Request $request)
     {
+        $shop = auth()->user()->shop;
+
         $request->validate([
-            'rating' => 'required|integer|min:1|max:5',
-            'comment' => 'nullable|string|max:1000',
+            'name' => 'required|string|max:255',
+            'description' => 'required|string',
+            'price' => 'required|numeric|min:0',
+            'quantity' => 'required|integer|min:0',
+            'category_id' => 'required|exists:categories,id',
+            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
-        // Check if user already reviewed this product
-        $existingReview = Review::where('product_id', $product->id)
-            ->where('user_id', auth()->id())
-            ->first();
+        $data = $request->only(['name', 'description', 'price', 'quantity', 'category_id']);
+        $data['shop_id'] = $shop->id;
+        $data['status'] = 'active';
 
-        if ($existingReview) {
-            return back()->with('error', 'You have already reviewed this product.');
+        // Handle image uploads
+        if ($request->hasFile('images')) {
+            $images = [];
+            foreach ($request->file('images') as $image) {
+                $images[] = $image->store('products', 'public');
+            }
+            $data['images'] = $images;
         }
 
-        Review::create([
-            'product_id' => $product->id,
-            'user_id' => auth()->id(),
-            'rating' => $request->rating,
-            'comment' => $request->comment,
+        Product::create($data);
+
+        return redirect()->route('vendor.products')->with('success', 'Product created successfully.');
+    }
+
+    public function edit(Product $product): View
+    {
+        if ($product->shop_id !== auth()->user()->shop->id) {
+            abort(403);
+        }
+
+        $categories = Category::all();
+        return view('pages.vendor.products-edit', compact('product', 'categories'));
+    }
+
+    public function update(Request $request, Product $product)
+    {
+        if ($product->shop_id !== auth()->user()->shop->id) {
+            abort(403);
+        }
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'required|string',
+            'price' => 'required|numeric|min:0',
+            'quantity' => 'required|integer|min:0',
+            'category_id' => 'required|exists:categories,id',
+            'status' => 'required|in:active,inactive',
+            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
-        return back()->with('success', 'Review submitted successfully!');
+        $data = $request->only(['name', 'description', 'price', 'quantity', 'category_id', 'status']);
+
+        // Handle new image uploads
+        if ($request->hasFile('images')) {
+            $images = $product->images ?? [];
+            foreach ($request->file('images') as $image) {
+                $images[] = $image->store('products', 'public');
+            }
+            $data['images'] = $images;
+        }
+
+        $product->update($data);
+
+        return redirect()->route('vendor.products')->with('success', 'Product updated successfully.');
+    }
+
+    public function destroy(Product $product)
+    {
+        if ($product->shop_id !== auth()->user()->shop->id) {
+            abort(403);
+        }
+
+        $product->delete();
+        return back()->with('success', 'Product deleted successfully.');
     }
 }

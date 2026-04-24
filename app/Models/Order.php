@@ -8,8 +8,14 @@ class Order extends Model
 {
     protected $fillable = [
         'total_price',
+        'shipping_price',
         'status',
-        'client_id'
+        'shipping_address',
+        'shipping_city',
+        'shipping_zip',
+        'payment_method',
+        'client_id',
+        'shipping_method_id'
     ];
 
     public function client()
@@ -20,5 +26,10 @@ class Order extends Model
     public function items()
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function shippingMethod()
+    {
+        return $this->belongsTo(ShippingMethod::class);
     }
 }
