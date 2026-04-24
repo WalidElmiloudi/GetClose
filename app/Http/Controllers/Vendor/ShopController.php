@@ -18,18 +18,32 @@ class ShopController extends Controller
         return view('pages.shops',compact('shops'));
     }
 
-    public function vendorShop(User $user)
+    public function vendorShop()
     {
-        $shop = $user->shop();
-        return view('pages.vendor.dashboard',compact('shop'));
+        $shop = auth()->user()->shop;
+        
+        if (!$shop) {
+            return view('pages.vendor.create-shop');
+        }
+        
+        $shop->load('products', 'categories');
+        
+        return view('pages.vendor.dashboard', compact('shop'));
     }
 
     public function store(StoreShopRequest $request)
     {
         $data = $request->validated();
         $data['owner_id'] = auth()->id();
+        
+        // Handle logo upload
+        if ($request->hasFile('logo')) {
+            $data['logo'] = $request->file('logo')->store('shops', 'public');
+        }
+        
         Shop::create($data);
-        return redirect()->back();
+        
+        return redirect()->route('vendor.dashboard')->with('status', 'Shop created successfully!');
     }
 
     public function destroy(Shop $shop)
