@@ -18,6 +18,10 @@ class ProductController extends Controller
             return redirect()->route('vendor.dashboard')->with('error', 'Create a shop first.');
         }
 
+        if ($shop->status !== 'approved') {
+            return redirect()->route('vendor.dashboard')->with('error', 'Your shop is currently ' . $shop->status . '. Please wait for admin approval before managing products.');
+        }
+
         $products = Product::where('shop_id', $shop->id)
             ->with('category')
             ->latest()
@@ -29,6 +33,15 @@ class ProductController extends Controller
     public function create(): View
     {
         $shop = auth()->user()->shop;
+        
+        if (!$shop) {
+            return redirect()->route('vendor.dashboard')->with('error', 'Create a shop first.');
+        }
+
+        if ($shop->status !== 'approved') {
+            return redirect()->route('vendor.dashboard')->with('error', 'Your shop is currently ' . $shop->status . '. Please wait for admin approval before adding products.');
+        }
+
         $categories = Category::all();
         
         return view('pages.vendor.products-create', compact('shop', 'categories'));
@@ -37,6 +50,14 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         $shop = auth()->user()->shop;
+
+        if (!$shop) {
+            return redirect()->route('vendor.dashboard')->with('error', 'Create a shop first.');
+        }
+
+        if ($shop->status !== 'approved') {
+            return redirect()->route('vendor.dashboard')->with('error', 'Your shop is currently ' . $shop->status . '. Please wait for admin approval before adding products.');
+        }
 
         $request->validate([
             'name' => 'required|string|max:255',
@@ -55,9 +76,14 @@ class ProductController extends Controller
         if ($request->hasFile('images')) {
             $images = [];
             foreach ($request->file('images') as $image) {
-                $images[] = $image->store('products', 'public');
+                $path = $image->store('products', 'public');
+                if ($path) {
+                    $images[] = $path;
+                }
             }
-            $data['images'] = $images;
+            $data['images'] = !empty($images) ? $images : null;
+        } else {
+            $data['images'] = null;
         }
 
         Product::create($data);
@@ -67,7 +93,17 @@ class ProductController extends Controller
 
     public function edit(Product $product): View
     {
-        if ($product->shop_id !== auth()->user()->shop->id) {
+        $shop = auth()->user()->shop;
+        
+        if (!$shop) {
+            return redirect()->route('vendor.dashboard')->with('error', 'Create a shop first.');
+        }
+
+        if ($shop->status !== 'approved') {
+            return redirect()->route('vendor.dashboard')->with('error', 'Your shop is currently ' . $shop->status . '. Please wait for admin approval before editing products.');
+        }
+
+        if ($product->shop_id !== $shop->id) {
             abort(403);
         }
 
@@ -77,7 +113,17 @@ class ProductController extends Controller
 
     public function update(Request $request, Product $product)
     {
-        if ($product->shop_id !== auth()->user()->shop->id) {
+        $shop = auth()->user()->shop;
+        
+        if (!$shop) {
+            return redirect()->route('vendor.dashboard')->with('error', 'Create a shop first.');
+        }
+
+        if ($shop->status !== 'approved') {
+            return redirect()->route('vendor.dashboard')->with('error', 'Your shop is currently ' . $shop->status . '. Please wait for admin approval before updating products.');
+        }
+
+        if ($product->shop_id !== $shop->id) {
             abort(403);
         }
 
@@ -96,10 +142,16 @@ class ProductController extends Controller
         // Handle new image uploads
         if ($request->hasFile('images')) {
             $images = $product->images ?? [];
-            foreach ($request->file('images') as $image) {
-                $images[] = $image->store('products', 'public');
+            if (!is_array($images)) {
+                $images = [];
             }
-            $data['images'] = $images;
+            foreach ($request->file('images') as $image) {
+                $path = $image->store('products', 'public');
+                if ($path) {
+                    $images[] = $path;
+                }
+            }
+            $data['images'] = !empty($images) ? $images : null;
         }
 
         $product->update($data);
@@ -109,7 +161,17 @@ class ProductController extends Controller
 
     public function destroy(Product $product)
     {
-        if ($product->shop_id !== auth()->user()->shop->id) {
+        $shop = auth()->user()->shop;
+        
+        if (!$shop) {
+            return redirect()->route('vendor.dashboard')->with('error', 'Create a shop first.');
+        }
+
+        if ($shop->status !== 'approved') {
+            return redirect()->route('vendor.dashboard')->with('error', 'Your shop is currently ' . $shop->status . '. Please wait for admin approval before deleting products.');
+        }
+
+        if ($product->shop_id !== $shop->id) {
             abort(403);
         }
 

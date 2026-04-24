@@ -20,6 +20,36 @@
             </div>
         @endif
 
+        @if($shop->status === 'pending')
+            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-6 mb-8">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="ph-fill ph-warning text-4xl text-yellow-400"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-lg font-bold text-yellow-800">Shop Pending Approval</h3>
+                        <p class="text-yellow-700 mt-1">
+                            Your shop is currently under review. You will be able to add products once an admin approves your shop.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        @elseif($shop->status === 'refused')
+            <div class="bg-red-50 border-l-4 border-red-400 p-6 mb-8">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="ph-fill ph-x-circle text-4xl text-red-400"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-lg font-bold text-red-800">Shop Application Rejected</h3>
+                        <p class="text-red-700 mt-1">
+                            Unfortunately, your shop application has been rejected. Please contact support for more information.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        @endif
+
         <!-- Stats Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <div class="bg-white rounded-xl shadow-lg p-6">
@@ -74,35 +104,42 @@
 
         <!-- Quick Actions -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <a href="{{ route('vendor.products.create') }}" class="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-xl shadow-lg p-6 block transition-all">
-                <div class="flex items-center gap-4">
-                    <i class="ph-fill ph-plus-circle text-4xl"></i>
-                    <div>
-                        <h3 class="text-xl font-bold">Add Product</h3>
-                        <p class="text-purple-100">List a new item</p>
+            @if($shop->status === 'approved')
+                <a href="{{ route('vendor.products.create') }}" class="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-xl shadow-lg p-6 block transition-all">
+                    <div class="flex items-center gap-4">
+                        <i class="ph-fill ph-plus-circle text-4xl"></i>
+                        <div>
+                            <h3 class="text-xl font-bold">Add Product</h3>
+                            <p class="text-purple-100">List a new item</p>
+                        </div>
                     </div>
-                </div>
-            </a>
+                </a>
 
-            <a href="{{ route('vendor.products') }}" class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl shadow-lg p-6 block transition-all">
-                <div class="flex items-center gap-4">
-                    <i class="ph-fill ph-list text-4xl"></i>
-                    <div>
-                        <h3 class="text-xl font-bold">Manage Products</h3>
-                        <p class="text-blue-100">View all products</p>
+                <a href="{{ route('vendor.products') }}" class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl shadow-lg p-6 block transition-all">
+                    <div class="flex items-center gap-4">
+                        <i class="ph-fill ph-list text-4xl"></i>
+                        <div>
+                            <h3 class="text-xl font-bold">Manage Products</h3>
+                            <p class="text-blue-100">View all products</p>
+                        </div>
                     </div>
-                </div>
-            </a>
+                </a>
 
-            <a href="{{ route('vendor.orders') }}" class="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-xl shadow-lg p-6 block transition-all">
-                <div class="flex items-center gap-4">
-                    <i class="ph-fill ph-receipt text-4xl"></i>
-                    <div>
-                        <h3 class="text-xl font-bold">View Orders</h3>
-                        <p class="text-green-100">Manage orders</p>
+                <a href="{{ route('vendor.orders') }}" class="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-xl shadow-lg p-6 block transition-all">
+                    <div class="flex items-center gap-4">
+                        <i class="ph-fill ph-receipt text-4xl"></i>
+                        <div>
+                            <h3 class="text-xl font-bold">View Orders</h3>
+                            <p class="text-green-100">Manage orders</p>
+                        </div>
                     </div>
+                </a>
+            @else
+                <div class="col-span-3 bg-gray-100 rounded-xl p-6 text-center">
+                    <i class="ph-fill ph-lock text-4xl text-gray-400 mb-2"></i>
+                    <p class="text-gray-600 font-semibold">Product management is disabled until your shop is approved</p>
                 </div>
-            </a>
+            @endif
         </div>
 
         @if($lowStockProducts->count() > 0)

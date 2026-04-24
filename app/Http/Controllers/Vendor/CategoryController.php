@@ -28,6 +28,13 @@ class CategoryController extends Controller
             }
             return redirect()->back()->with('error', 'You need to create a shop first.');
         }
+
+        if ($shop->status !== 'approved') {
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => 'Your shop is currently ' . $shop->status . '. Please wait for admin approval before adding categories.'], 403);
+            }
+            return redirect()->back()->with('error', 'Your shop is currently ' . $shop->status . '. Please wait for admin approval before adding categories.');
+        }
         
         $data = $request->validated();
         $data['shop_id'] = $shop->id;
