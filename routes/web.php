@@ -30,7 +30,9 @@ Route::get('/search', [SearchController::class, 'index'])->name('search');
 Route::get('/products', [ProductController::class, 'index'])->name('products');
 Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
 Route::get('/shops', [ShopController::class, 'index'])->name('shops');
-Route::get('/shops/{shop}', [VendorProductController::class, 'productShop'])->name('shops.products');
+Route::get('/shops/{shop}', [ShopController::class, 'show'])->name('shops.show');
+Route::get('/shops/{shop}/category/{category}', [ShopController::class, 'showByCategory'])->name('shops.category');
+Route::get('/shops/{shop}/search', [ShopController::class, 'search'])->name('shops.search');
 Route::get('/categories/{shop}', [CategoryController::class, 'show'])->name('categories.show');
 
 // Authenticated routes
