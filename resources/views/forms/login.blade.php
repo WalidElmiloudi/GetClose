@@ -6,6 +6,9 @@
           <label class="text-xl self-start lg:text-2xl" for="password"> Password :</label>
           <input class="h-10 rounded-lg w-full bg-white pl-2 text-xl lg:text-2xl py-2" type="password" name="password"
               placeholder="********">
+          <div class="w-full flex justify-end">
+              <a href="{{ route('password.request') }}" class="text-sm text-red-600 hover:text-red-900 font-semibold">Forgot password?</a>
+          </div>
           <button
               class="h-10 rounded-lg w-full bg-red-500 text-white font-bold text-xl lg:text-2xl cursor-pointer hover:bg-red-900"
               type="submit">LOGIN</button>
