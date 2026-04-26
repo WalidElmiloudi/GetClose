@@ -51,6 +51,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/orders', [OrderController::class, 'index'])->name('orders');
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
     Route::delete('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
+    Route::post('/orders/{order}/dispute', [OrderController::class, 'createDispute'])->name('orders.dispute');
     
     // Checkout routes
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout');

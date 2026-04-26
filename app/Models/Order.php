@@ -20,7 +20,7 @@ class Order extends Model
 
     public function client()
     {
-        return $this->belongsTo(User::class, 'client_id');
+        return $this->belongsTo(User::class,'client_id');
     }
 
     public function items()
@@ -36,5 +36,10 @@ class Order extends Model
     public function payment()
     {
         return $this->hasOne(Payement::class);
+    }
+    
+    public function dispute()
+    {
+        return $this->hasOne(Dispute::class);
     }
 }
