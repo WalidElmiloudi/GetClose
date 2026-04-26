@@ -60,7 +60,7 @@ class User extends Authenticatable
 
     public function orders()
     {
-        return $this->hasMAny(Order::class);
+        return $this->hasMAny(Order::class,'client_id');
     }
 
     public function payements()

@@ -67,10 +67,41 @@
                                 @endforeach
                             </div>
                             
-                            <div class="mt-6 pt-6 border-t border-gray-200 flex justify-between items-center">
-                                <span class="text-xl font-bold text-gray-800">Total</span>
-                                <span class="text-2xl font-bold text-red-600">${{ number_format($order->total_price, 2) }}</span>
+                            <div class="mt-6 pt-6 border-t border-gray-200">
+                                <div class="grid grid-cols-2 gap-4 mb-4">
+                                    <div>
+                                        <p class="text-sm text-gray-500">Payment Method</p>
+                                        <p class="font-semibold text-gray-800">
+                                            @if($order->payment_method == 'cash')
+                                                <i class="ph-fill ph-money text-green-600"></i> Cash on Delivery
+                                            @elseif($order->payment_method == 'stripe')
+                                                <i class="ph-fill ph-credit-card text-blue-600"></i> Credit Card (Stripe)
+                                            @else
+                                                {{ ucfirst($order->payment_method) }}
+                                            @endif
+                                        </p>
+                                    </div>
+                                    @if($order->payment)
+                                        <div>
+                                            <p class="text-sm text-gray-500">Payment Status</p>
+                                            <p class="font-semibold">
+                                                @if($order->payment->status == 'completed')
+                                                    <span class="text-green-600"><i class="ph-fill ph-check-circle"></i> Paid</span>
+                                                @elseif($order->payment->status == 'pending')
+                                                    <span class="text-yellow-600"><i class="ph-fill ph-clock"></i> Pending</span>
+                                                @else
+                                                    <span class="text-gray-600">{{ ucfirst($order->payment->status) }}</span>
+                                                @endif
+                                            </p>
+                                        </div>
+                                    @endif
+                                </div>
+                                <div class="flex justify-between items-center pt-4 border-t border-gray-200">
+                                    <span class="text-xl font-bold text-gray-800">Total</span>
+                                    <span class="text-2xl font-bold text-red-600">${{ number_format($order->total_price, 2) }}</span>
+                                </div>
                             </div>
+
                         </div>
                     </div>
                 @endforeach

@@ -16,7 +16,7 @@ class OrderController extends Controller
     {
         $user = auth()->user();
 
-        $orders = $user->orders()->with('items.product.shop')->latest()->get();
+        $orders = $user->orders()->with(['items.product.shop', 'payment'])->latest()->get();
 
         return view('pages.client.orders', compact('orders'));
     }

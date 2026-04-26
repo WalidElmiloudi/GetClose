@@ -66,7 +66,7 @@
       @else
           <!-- Client Navbar (Default) -->
           <div
-              class="lg:hidden fixed bottom-0 h-20 w-full shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] grid grid-cols-5 bg-white">
+              class="lg:hidden fixed bottom-0 h-20 w-full shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] grid grid-cols-6 bg-white">
               <a href="/" class="flex justify-center items-center {{ request()->routeIs('home') ? 'bg-red-500' : '' }} rounded-full m-2"><i
                       class="ph-fill ph-house text-4xl {{ request()->routeIs('home') ? 'text-white' : '' }}"></i></a>
               <a href="{{ route('shops') }}" class="flex justify-center items-center {{ request()->routeIs('shops') ? 'bg-red-500' : '' }} rounded-full m-2"><i class="ph ph-storefront text-4xl {{ request()->routeIs('shops') ? 'text-white' : '' }}"></i></a>
@@ -79,10 +79,11 @@
                       </span>
                   @endif
               </a>
+              <a href="{{ route('orders') }}" class="flex justify-center items-center {{ request()->routeIs('orders') || request()->routeIs('orders.*') ? 'bg-red-500' : '' }} rounded-full m-2"><i class="ph ph-package text-4xl {{ request()->routeIs('orders') || request()->routeIs('orders.*') ? 'text-white' : '' }}"></i></a>
               <a href="{{ route('profile.view') }}" class="flex justify-center items-center {{ request()->routeIs('profile.*') ? 'bg-red-500' : '' }} rounded-full m-2"><i class="ph ph-user text-4xl {{ request()->routeIs('profile.*') ? 'text-white' : '' }}"></i></a>
           </div>
           <div
-              class="hidden lg:grid 2xl:hidden fixed left-0 bottom-0 z-0  w-20 h-[calc(100vh-80px)]  shadow-[5px_0_5px_-3px_rgba(0,0,0,0.1)] grid-rows-5 bg-white">
+              class="hidden lg:grid 2xl:hidden fixed left-0 bottom-0 z-0  w-20 h-[calc(100vh-80px)]  shadow-[5px_0_5px_-3px_rgba(0,0,0,0.1)] grid-rows-6 bg-white">
               <a href="/" class="flex justify-center items-center {{ request()->routeIs('home') ? 'bg-red-500' : '' }} rounded-full m-2"><i
                       class="ph-fill ph-house text-4xl {{ request()->routeIs('home') ? 'text-white' : '' }}"></i></a>
               <a href="{{ route('shops') }}" class="flex justify-center items-center {{ request()->routeIs('shops') ? 'bg-red-500' : '' }} rounded-full m-2"><i class="ph ph-storefront text-4xl {{ request()->routeIs('shops') ? 'text-white' : '' }}"></i></a>
@@ -95,9 +96,10 @@
                       </span>
                   @endif
               </a>
+              <a href="{{ route('orders') }}" class="flex justify-center items-center {{ request()->routeIs('orders') || request()->routeIs('orders.*') ? 'bg-red-500' : '' }} rounded-full m-2"><i class="ph ph-package text-4xl {{ request()->routeIs('orders') || request()->routeIs('orders.*') ? 'text-white' : '' }}"></i></a>
               <a href="{{ route('profile.view') }}" class="flex justify-center items-center {{ request()->routeIs('profile.*') ? 'bg-red-500' : '' }} rounded-full m-2"><i class="ph ph-user text-4xl {{ request()->routeIs('profile.*') ? 'text-white' : '' }}"></i></a>
           </div>
-          <div class="hidden 2xl:grid top-20 h-20 shadow-sm  w-full grid-cols-5 bg-white">
+          <div class="hidden 2xl:grid top-20 h-20 shadow-sm  w-full grid-cols-6 bg-white">
               <a href="/"
                   class="flex justify-center items-center {{ request()->routeIs('home') ? 'bg-red-500 text-white' : 'hover:bg-red-400 hover:text-white' }} rounded-full m-2 text-2xl font-bold ease-in-out duration-150">Home</a>
               <a href="{{ route('shops') }}"
@@ -113,6 +115,8 @@
                       </span>
                   @endif
               </a>
+              <a href="{{ route('orders') }}"
+                  class="flex justify-center items-center {{ request()->routeIs('orders') || request()->routeIs('orders.*') ? 'bg-red-500 text-white' : 'hover:bg-red-400 hover:text-white' }} rounded-full m-2 text-2xl font-bold ease-in-out duration-150">Orders</a>
               <a href="{{ route('profile.view') }}"
                   class="flex justify-center items-center {{ request()->routeIs('profile.*') ? 'bg-red-500 text-white' : 'hover:bg-red-400 hover:text-white' }} rounded-full m-2 text-2xl font-bold ease-in-out duration-150">Profile</a>
           </div>
