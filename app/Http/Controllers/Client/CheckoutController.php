@@ -6,10 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Payement;
 use App\Models\ShippingMethod;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
+use Stripe\Stripe;
+use Stripe\PaymentIntent;
 
 class CheckoutController extends Controller
 {
@@ -45,7 +48,8 @@ class CheckoutController extends Controller
             'shipping_city' => 'required|string|max:100',
             'shipping_zip' => 'required|string|max:20',
             'shipping_method_id' => 'required|exists:shipping_methods,id',
-            'payment_method' => 'required|string|in:cash,card,paypal',
+            'payment_method' => 'required|string|in:cash,stripe',
+            'stripe_payment_intent_id' => 'nullable|string',
         ]);
 
         $cart = Cart::where('client_id', auth()->id())
@@ -58,29 +62,60 @@ class CheckoutController extends Controller
 
         $shippingMethod = ShippingMethod::find($request->shipping_method_id);
 
+        // Calculate totals
+        $subtotal = $cart->items->sum(function($item) {
+            return $item->price * $item->quantity;
+        });
+        
+        $shippingPrice = $shippingMethod->price;
+        $totalPrice = $subtotal + $shippingPrice;
+
+        // Handle Stripe payment
+        if ($request->payment_method === 'stripe') {
+            if (!$request->stripe_payment_intent_id) {
+                return back()->with('error', 'Payment not completed. Please complete the Stripe payment.');
+            }
+
+            try {
+                Stripe::setApiKey(config('services.stripe.secret'));
+                $paymentIntent = PaymentIntent::retrieve($request->stripe_payment_intent_id);
+                
+                if ($paymentIntent->status !== 'succeeded') {
+                    return back()->with('error', 'Payment not successful. Please try again.');
+                }
+            } catch (\Exception $e) {
+                return back()->with('error', 'Payment verification failed. Please try again.');
+            }
+        }
+
         try {
             DB::beginTransaction();
 
-            // Calculate totals
-            $subtotal = $cart->items->sum(function($item) {
-                return $item->price * $item->quantity;
-            });
-            
-            $shippingPrice = $shippingMethod->price;
-            $totalPrice = $subtotal + $shippingPrice;
-
             // Create order
+            $orderStatus = $request->payment_method === 'cash' ? 'pending' : 'paid';
+            
             $order = Order::create([
                 'client_id' => auth()->id(),
                 'total_price' => $totalPrice,
                 'shipping_price' => $shippingPrice,
-                'status' => 'pending',
+                'status' => $orderStatus,
                 'shipping_address' => $request->shipping_address,
                 'shipping_city' => $request->shipping_city,
                 'shipping_zip' => $request->shipping_zip,
                 'payment_method' => $request->payment_method,
                 'shipping_method_id' => $shippingMethod->id,
             ]);
+
+            // Create payment record for Stripe
+            if ($request->payment_method === 'stripe' && $request->stripe_payment_intent_id) {
+                Payement::create([
+                    'order_id' => $order->id,
+                    'amount' => $totalPrice,
+                    'status' => 'completed',
+                    'payment_method' => 'stripe',
+                    'transaction_id' => $request->stripe_payment_intent_id,
+                ]);
+            }
 
             // Create order items
             foreach ($cart->items as $item) {
@@ -109,6 +144,35 @@ class CheckoutController extends Controller
     }
 
     /**
+     * Create Stripe Payment Intent
+     */
+    public function createPaymentIntent(Request $request)
+    {
+        $request->validate([
+            'amount' => 'required|numeric|min:0.01',
+        ]);
+
+        try {
+            Stripe::setApiKey(config('services.stripe.secret'));
+            
+            $paymentIntent = PaymentIntent::create([
+                'amount' => intval($request->amount * 100), // Convert to cents
+                'currency' => 'usd',
+                'automatic_payment_methods' => [
+                    'enabled' => true,
+                ],
+            ]);
+
+            return response()->json([
+                'clientSecret' => $paymentIntent->client_secret,
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 400);
+        }
+    }
+
+    /**
      * Show order confirmation
      */
     public function confirmation(Order $order): View
@@ -118,7 +182,7 @@ class CheckoutController extends Controller
             abort(403);
         }
 
-        $order->load(['items.product', 'shippingMethod']);
+        $order->load(['items.product', 'shippingMethod', 'payment']);
 
         return view('pages.client.checkout-success', compact('order'));
     }

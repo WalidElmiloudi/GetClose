@@ -11,7 +11,7 @@
     <div class="max-w-5xl mx-auto">
         <h1 class="text-4xl font-bold text-gray-800 mb-8">Checkout</h1>
 
-        <form action="{{ route('checkout.store') }}" method="POST">
+        <form action="{{ route('checkout.store') }}" method="POST" id="checkout-form">
             @csrf
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <!-- Left: Shipping & Payment Info -->
@@ -89,32 +89,38 @@
                         <h2 class="text-2xl font-bold text-gray-800 mb-6">Payment Method</h2>
                         
                         <div class="space-y-3">
-                            <label class="flex items-center gap-4 p-4 border-2 rounded-lg cursor-pointer hover:border-red-500 transition-colors {{ old('payment_method') == 'cash' ? 'border-red-500 bg-red-50' : 'border-gray-200' }}">
-                                <input type="radio" name="payment_method" value="cash" required class="w-5 h-5 text-red-500" {{ old('payment_method') == 'cash' ? 'checked' : '' }}>
+                            <label class="flex items-center gap-4 p-4 border-2 rounded-lg cursor-pointer hover:border-red-500 transition-colors {{ old('payment_method', 'cash') == 'cash' ? 'border-red-500 bg-red-50' : 'border-gray-200' }}">
+                                <input type="radio" name="payment_method" value="cash" required class="w-5 h-5 text-red-500" {{ old('payment_method', 'cash') == 'cash' ? 'checked' : '' }} onchange="togglePaymentFields()">
                                 <div>
                                     <i class="ph-fill ph-money text-2xl text-green-600"></i>
                                     <span class="font-semibold text-gray-800 ml-2">Cash on Delivery</span>
+                                    <p class="text-sm text-gray-500 mt-1">Pay when you receive your order</p>
                                 </div>
                             </label>
 
-                            <label class="flex items-center gap-4 p-4 border-2 rounded-lg cursor-pointer hover:border-red-500 transition-colors {{ old('payment_method') == 'card' ? 'border-red-500 bg-red-50' : 'border-gray-200' }}">
-                                <input type="radio" name="payment_method" value="card" required class="w-5 h-5 text-red-500" {{ old('payment_method') == 'card' ? 'checked' : '' }}>
+                            <label class="flex items-center gap-4 p-4 border-2 rounded-lg cursor-pointer hover:border-red-500 transition-colors {{ old('payment_method') == 'stripe' ? 'border-red-500 bg-red-50' : 'border-gray-200' }}">
+                                <input type="radio" name="payment_method" value="stripe" required class="w-5 h-5 text-red-500" {{ old('payment_method') == 'stripe' ? 'checked' : '' }} onchange="togglePaymentFields()">
                                 <div>
                                     <i class="ph-fill ph-credit-card text-2xl text-blue-600"></i>
-                                    <span class="font-semibold text-gray-800 ml-2">Credit/Debit Card</span>
-                                </div>
-                            </label>
-
-                            <label class="flex items-center gap-4 p-4 border-2 rounded-lg cursor-pointer hover:border-red-500 transition-colors {{ old('payment_method') == 'paypal' ? 'border-red-500 bg-red-50' : 'border-gray-200' }}">
-                                <input type="radio" name="payment_method" value="paypal" required class="w-5 h-5 text-red-500" {{ old('payment_method') == 'paypal' ? 'checked' : '' }}>
-                                <div>
-                                    <i class="ph-fill ph-paypal-logo text-2xl text-indigo-600"></i>
-                                    <span class="font-semibold text-gray-800 ml-2">PayPal</span>
+                                    <span class="font-semibold text-gray-800 ml-2">Credit/Debit Card (Stripe)</span>
+                                    <p class="text-sm text-gray-500 mt-1">Secure payment with Stripe</p>
                                 </div>
                             </label>
                             @error('payment_method')
                                 <p class="text-red-500 text-sm">{{ $message }}</p>
                             @enderror
+                        </div>
+
+                        <!-- Stripe Card Element -->
+                        <div id="stripe-payment-section" class="mt-6 {{ old('payment_method') == 'stripe' ? '' : 'hidden' }}">
+                            <div class="border-t border-gray-200 pt-6">
+                                <h3 class="text-lg font-semibold text-gray-800 mb-4">Card Details</h3>
+                                <div id="card-element" class="p-4 border border-gray-300 rounded-lg bg-gray-50">
+                                    <!-- Stripe Card Element will be inserted here -->
+                                </div>
+                                <div id="card-errors" class="text-red-500 text-sm mt-2" role="alert"></div>
+                                <input type="hidden" name="stripe_payment_intent_id" id="stripe-payment-intent-id">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -160,7 +166,7 @@
                             </div>
                         </div>
 
-                        <button type="submit" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-4 rounded-lg transition-colors duration-200 text-lg mt-6">
+                        <button type="submit" id="submit-button" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-4 rounded-lg transition-colors duration-200 text-lg mt-6">
                             Place Order
                         </button>
 
@@ -174,7 +180,63 @@
     </div>
 </main>
 
+<!-- Stripe JS -->
+<script src="https://js.stripe.com/v3/"></script>
 <script>
+// Toggle payment fields
+function togglePaymentFields() {
+    const stripeSection = document.getElementById('stripe-payment-section');
+    const stripeRadio = document.querySelector('input[name="payment_method"][value="stripe"]');
+    
+    if (stripeRadio.checked) {
+        stripeSection.classList.remove('hidden');
+    } else {
+        stripeSection.classList.add('hidden');
+    }
+}
+
+// Stripe integration
+let stripe;
+let cardElement;
+let paymentIntentId = null;
+
+@if(config('services.stripe.key'))
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Stripe
+    stripe = Stripe('{{ config('services.stripe.key') }}');
+    const elements = stripe.elements();
+    
+    // Create card element
+    cardElement = elements.create('card', {
+        style: {
+            base: {
+                fontSize: '16px',
+                color: '#424770',
+                '::placeholder': {
+                    color: '#aab7c4',
+                },
+            },
+            invalid: {
+                color: '#9e2146',
+            },
+        },
+    });
+    
+    // Mount card element
+    cardElement.mount('#card-element');
+    
+    // Handle validation errors
+    cardElement.on('change', function(event) {
+        const displayError = document.getElementById('card-errors');
+        if (event.error) {
+            displayError.textContent = event.error.message;
+        } else {
+            displayError.textContent = '';
+        }
+    });
+});
+@endif
+
 // Update totals when shipping method changes
 document.querySelectorAll('input[name="shipping_method_id"]').forEach(radio => {
     radio.addEventListener('change', function() {
@@ -192,5 +254,74 @@ const firstChecked = document.querySelector('input[name="shipping_method_id"]:ch
 if (firstChecked) {
     firstChecked.dispatchEvent(new Event('change'));
 }
+
+// Handle form submission
+const checkoutForm = document.getElementById('checkout-form');
+const submitButton = document.getElementById('submit-button');
+
+checkoutForm.addEventListener('submit', async function(e) {
+    const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
+    
+    // If Stripe payment, process payment first
+    if (paymentMethod === 'stripe') {
+        e.preventDefault();
+        
+        if (!stripe || !cardElement) {
+            alert('Stripe is not initialized. Please check your connection.');
+            return;
+        }
+        
+        submitButton.disabled = true;
+        submitButton.textContent = 'Processing Payment...';
+        
+        try {
+            // Get total price
+            const totalPriceText = document.getElementById('totalPrice').textContent.replace('$', '').replace(',', '');
+            const totalAmount = parseFloat(totalPriceText);
+            
+            // Create payment intent
+            const response = await fetch('{{ route('checkout.create-payment-intent') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ amount: totalAmount })
+            });
+            
+            const data = await response.json();
+            
+            if (data.error) {
+                throw new Error(data.error);
+            }
+            
+            // Confirm card payment
+            const { paymentIntent, error } = await stripe.confirmCardPayment(data.clientSecret, {
+                payment_method: {
+                    card: cardElement,
+                }
+            });
+            
+            if (error) {
+                const errorElement = document.getElementById('card-errors');
+                errorElement.textContent = error.message;
+                submitButton.disabled = false;
+                submitButton.textContent = 'Place Order';
+            } else {
+                // Payment successful
+                if (paymentIntent.status === 'succeeded') {
+                    document.getElementById('stripe-payment-intent-id').value = paymentIntent.id;
+                    // Submit the form
+                    checkoutForm.submit();
+                }
+            }
+        } catch (error) {
+            const errorElement = document.getElementById('card-errors');
+            errorElement.textContent = error.message || 'An error occurred';
+            submitButton.disabled = false;
+            submitButton.textContent = 'Place Order';
+        }
+    }
+});
 </script>
 @endsection
