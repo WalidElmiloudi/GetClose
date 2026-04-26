@@ -26,8 +26,10 @@ class AppServiceProvider extends ServiceProvider
             if (auth()->check() && auth()->user()->role === 'client') {
                 $cartController = new CartController();
                 $view->with('cartCount', $cartController->getCount());
+                $view->with('cartHelper', $cartController);
             } else {
                 $view->with('cartCount', 0);
+                $view->with('cartHelper', null);
             }
         });
     }

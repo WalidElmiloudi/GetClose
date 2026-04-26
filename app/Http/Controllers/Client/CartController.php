@@ -76,4 +76,34 @@ class CartController extends Controller
 
         return $cart->items()->sum('quantity');
     }
+
+    public function isInCart(int $productId): bool
+    {
+        if (!auth()->check()) {
+            return false;
+        }
+
+        $cart = auth()->user()->cart;
+        
+        if (!$cart) {
+            return false;
+        }
+
+        return $cart->items()->where('product_id', $productId)->exists();
+    }
+
+    public function getCartItem(int $productId)
+    {
+        if (!auth()->check()) {
+            return null;
+        }
+
+        $cart = auth()->user()->cart;
+        
+        if (!$cart) {
+            return null;
+        }
+
+        return $cart->items()->where('product_id', $productId)->first();
+    }
 }

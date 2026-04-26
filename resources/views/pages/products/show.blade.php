@@ -91,22 +91,55 @@
                     <!-- Add to Cart (Only for clients) -->
                     @if($product->status == 'active' && $product->quantity > 0)
                         @if(auth()->check() && auth()->user()->role === 'client')
-                            <form action="{{ route('cart.store') }}" method="POST" class="space-y-4">
-                                @csrf
-                                <input type="hidden" name="product_id" value="{{ $product->id }}">
-                                <input type="hidden" name="price" value="{{ $product->price }}">
-                                
-                                <div class="flex items-center gap-4">
-                                    <label class="font-semibold text-gray-700">Quantity:</label>
-                                    <input type="number" name="quantity" value="1" min="1" max="{{ $product->quantity }}" 
-                                        class="w-24 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                            @php
+                                $isInCart = $cartHelper && $cartHelper->isInCart($product->id);
+                                $cartItem = $isInCart ? $cartHelper->getCartItem($product->id) : null;
+                            @endphp
+
+                            @if($isInCart)
+                                <!-- Product is in cart - Show Remove Button -->
+                                <div class="space-y-4">
+                                    <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                                        <p class="text-green-700 font-semibold">
+                                            <i class="ph-fill ph-check-circle"></i> 
+                                            Added to Cart (Quantity: {{ $cartItem->quantity }})
+                                        </p>
+                                    </div>
+                                    
+                                    <form action="{{ route('cart.destroy', $cartItem->id) }}" method="POST" class="space-y-4">
+                                        @csrf
+                                        @method('DELETE')
+                                        
+                                        <button type="submit" 
+                                            class="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-4 px-8 rounded-lg transition-colors duration-200 text-lg">
+                                            <i class="ph-bold ph-trash"></i> Remove from Cart
+                                        </button>
+                                    </form>
+                                    
+                                    <a href="{{ route('cart') }}" 
+                                        class="block w-full text-center bg-red-500 hover:bg-red-600 text-white font-bold py-4 px-8 rounded-lg transition-colors duration-200 text-lg">
+                                        <i class="ph-bold ph-shopping-cart"></i> View Cart
+                                    </a>
                                 </div>
-                                
-                                <button type="submit" 
-                                    class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-4 px-8 rounded-lg transition-colors duration-200 text-lg">
-                                    <i class="ph-bold ph-shopping-cart"></i> Add to Cart
-                                </button>
-                            </form>
+                            @else
+                                <!-- Product not in cart - Show Add to Cart Button -->
+                                <form action="{{ route('cart.store') }}" method="POST" class="space-y-4">
+                                    @csrf
+                                    <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                    <input type="hidden" name="price" value="{{ $product->price }}">
+                                    
+                                    <div class="flex items-center gap-4">
+                                        <label class="font-semibold text-gray-700">Quantity:</label>
+                                        <input type="number" name="quantity" value="1" min="1" max="{{ $product->quantity }}" 
+                                            class="w-24 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                                    </div>
+                                    
+                                    <button type="submit" 
+                                        class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-4 px-8 rounded-lg transition-colors duration-200 text-lg">
+                                        <i class="ph-bold ph-shopping-cart"></i> Add to Cart
+                                    </button>
+                                </form>
+                            @endif
                         @else
                             <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
                                 <p class="text-blue-700 font-semibold">
