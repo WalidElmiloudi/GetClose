@@ -1,0 +1,153 @@
+@extends('layouts.app')
+@section('page', 'ORDER TRACKING')
+@section('content')
+<main class="w-full min-h-screen bg-gradient-to-b from-red-50 to-white py-10 px-4 lg:px-30">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-4xl font-bold text-gray-800 mb-8">Order #{{ $order->id }}</h1>
+
+        @if(session('success'))
+            <div class="bg-green-100 border border-green-400 text-green-700 px-6 py-4 rounded-lg mb-6">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        <!-- Order Status Timeline -->
+        <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Order Status</h2>
+            
+            @php
+                $statusSteps = ['pending', 'paid', 'processing', 'shipped', 'completed'];
+                $cancelledSteps = ['cancelled'];
+                $currentStatus = $order->status;
+            @endphp
+
+            @if(in_array($currentStatus, $cancelledSteps))
+                <!-- Cancelled Order -->
+                <div class="text-center py-8">
+                    <div class="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="ph-fill ph-x-circle text-6xl text-red-500"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-2">Order Cancelled</h3>
+                    <p class="text-gray-600">This order has been cancelled.</p>
+                </div>
+            @elseif(in_array($currentStatus, $statusSteps))
+                <!-- Active Order Timeline -->
+                <div class="relative">
+                    <div class="absolute left-0 right-0 top-6 h-1 bg-gray-200"></div>
+                    <div class="relative flex justify-between">
+                        @foreach($statusSteps as $index => $step)
+                            @php
+                                $isActive = in_array($step, array_slice($statusSteps, 0, array_search($currentStatus, $statusSteps) + 1));
+                                $isCurrent = $step === $currentStatus;
+                            @endphp
+                            <div class="flex flex-col items-center" style="width: {{ 100 / count($statusSteps) }}%">
+                                <div class="w-12 h-12 rounded-full flex items-center justify-center relative z-10 {{ $isActive ? 'bg-red-500' : 'bg-gray-200' }}">
+                                    @if($isActive)
+                                        <i class="ph-fill ph-check text-white text-xl"></i>
+                                    @else
+                                        <div class="w-4 h-4 bg-gray-400 rounded-full"></div>
+                                    @endif
+                                </div>
+                                <div class="mt-3 text-center">
+                                    <div class="font-semibold text-sm {{ $isActive ? 'text-red-600' : 'text-gray-500' }}">
+                                        {{ ucfirst($step) }}
+                                    </div>
+                                    @if($isCurrent)
+                                        <div class="text-xs text-gray-500 mt-1">Current</div>
+                                    @endif
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
+        </div>
+
+        <!-- Order Details -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <!-- Items -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">Order Items</h3>
+                <div class="space-y-4">
+                    @foreach($order->items as $item)
+                        <div class="flex gap-3">
+                            <div class="w-16 h-16 bg-gradient-to-b from-red-100 to-red-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                                @if($item->product->images && count($item->product->images) > 0)
+                                    <img src="{{ asset('storage/' . $item->product->images[0]) }}" class="w-full h-full object-cover rounded-lg">
+                                @else
+                                    <i class="ph-fill ph-package text-2xl text-red-500"></i>
+                                @endif
+                            </div>
+                            <div class="flex-1">
+                                <div class="font-semibold text-gray-800">{{ $item->product->name }}</div>
+                                <div class="text-sm text-gray-500">Qty: {{ $item->quantity }}</div>
+                                <div class="text-red-600 font-bold">${{ number_format($item->price * $item->quantity, 2) }}</div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+
+            <!-- Shipping Info -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">Shipping Information</h3>
+                <div class="space-y-3 text-gray-600">
+                    <div>
+                        <div class="font-semibold text-gray-800 mb-1">Address:</div>
+                        <p>{{ $order->shipping_address }}</p>
+                        <p>{{ $order->shipping_city }}, {{ $order->shipping_zip }}</p>
+                    </div>
+                    @if($order->shippingMethod)
+                        <div>
+                            <div class="font-semibold text-gray-800 mb-1">Method:</div>
+                            <p>{{ $order->shippingMethod->name }}</p>
+                            @if($order->shippingMethod->estimated_days)
+                                <p class="text-sm text-gray-500">Estimated: {{ $order->shippingMethod->estimated_days }} days</p>
+                            @endif
+                        </div>
+                    @endif
+                    <div>
+                        <div class="font-semibold text-gray-800 mb-1">Payment:</div>
+                        <p class="capitalize">{{ str_replace('_', ' ', $order->payment_method) }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">Order Summary</h3>
+            <div class="space-y-2">
+                <div class="flex justify-between text-gray-600">
+                    <span>Subtotal</span>
+                    <span>${{ number_format($order->total_price - $order->shipping_price, 2) }}</span>
+                </div>
+                <div class="flex justify-between text-gray-600">
+                    <span>Shipping</span>
+                    <span>${{ number_format($order->shipping_price, 2) }}</span>
+                </div>
+                <div class="border-t border-gray-200 pt-2 flex justify-between text-2xl font-bold text-gray-800">
+                    <span>Total</span>
+                    <span class="text-red-600">${{ number_format($order->total_price, 2) }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex gap-4">
+            <a href="{{ route('orders') }}" class="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-4 rounded-lg transition-colors text-center text-lg">
+                Back to Orders
+            </a>
+            @if($order->status == 'pending')
+                <form action="{{ route('orders.cancel', $order) }}" method="POST" class="flex-1">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-4 rounded-lg transition-colors text-lg">
+                        Cancel Order
+                    </button>
+                </form>
+            @endif
+        </div>
+    </div>
+</main>
+@endsection
