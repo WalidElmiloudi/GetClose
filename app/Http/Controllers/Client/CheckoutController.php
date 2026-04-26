@@ -30,8 +30,8 @@ class CheckoutController extends Controller
         }
 
         $shippingMethods = ShippingMethod::where('is_active', true)->get();
-        
-        $subtotal = $cart->items->sum(function($item) {
+
+        $subtotal = $cart->items->sum(function ($item) {
             return $item->price * $item->quantity;
         });
 
@@ -63,10 +63,10 @@ class CheckoutController extends Controller
         $shippingMethod = ShippingMethod::find($request->shipping_method_id);
 
         // Calculate totals
-        $subtotal = $cart->items->sum(function($item) {
+        $subtotal = $cart->items->sum(function ($item) {
             return $item->price * $item->quantity;
         });
-        
+
         $shippingPrice = $shippingMethod->price;
         $totalPrice = $subtotal + $shippingPrice;
 
@@ -79,12 +79,17 @@ class CheckoutController extends Controller
             try {
                 Stripe::setApiKey(config('services.stripe.secret'));
                 $paymentIntent = PaymentIntent::retrieve($request->stripe_payment_intent_id);
-                
+
+                \Log::info('Stripe Payment Intent Status: ' . $paymentIntent->status);
+                \Log::info('Payment Intent ID: ' . $paymentIntent->id);
+                \Log::info('Payment Amount: ' . $paymentIntent->amount);
+
                 if ($paymentIntent->status !== 'succeeded') {
-                    return back()->with('error', 'Payment not successful. Please try again.');
+                    return back()->with('error', 'Payment not successful. Status: ' . $paymentIntent->status);
                 }
             } catch (\Exception $e) {
-                return back()->with('error', 'Payment verification failed. Please try again.');
+                \Log::error('Stripe Payment Verification Error: ' . $e->getMessage());
+                return back()->with('error', 'Payment verification failed. ' . $e->getMessage());
             }
         }
 
@@ -93,7 +98,7 @@ class CheckoutController extends Controller
 
             // Create order
             $orderStatus = $request->payment_method === 'cash' ? 'pending' : 'paid';
-            
+
             $order = Order::create([
                 'client_id' => auth()->id(),
                 'total_price' => $totalPrice,
@@ -110,9 +115,10 @@ class CheckoutController extends Controller
             if ($request->payment_method === 'stripe' && $request->stripe_payment_intent_id) {
                 Payement::create([
                     'order_id' => $order->id,
+                    'user_id' => auth()->id(),
                     'amount' => $totalPrice,
-                    'status' => 'completed',
-                    'payment_method' => 'stripe',
+                    'status' => 'paid',
+                    'method' => 'stripe',
                     'transaction_id' => $request->stripe_payment_intent_id,
                 ]);
             }
@@ -135,11 +141,14 @@ class CheckoutController extends Controller
 
             DB::commit();
 
-            return redirect()->route('orders.confirmation', $order)->with('success', 'Order placed successfully!');
+            \Log::info('Order created successfully: ' . $order->id);
 
+            return redirect()->route('orders.confirmation', $order)->with('success', 'Order placed successfully!');
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Failed to process order. Please try again.');
+            \Log::error('Order Creation Failed: ' . $e->getMessage());
+            \Log::error('Exception Trace: ' . $e->getTraceAsString());
+            return back()->with('error', 'Failed to process order. ' . $e->getMessage());
         }
     }
 
@@ -154,7 +163,7 @@ class CheckoutController extends Controller
 
         try {
             Stripe::setApiKey(config('services.stripe.secret'));
-            
+
             $paymentIntent = PaymentIntent::create([
                 'amount' => intval($request->amount * 100), // Convert to cents
                 'currency' => 'usd',
@@ -166,7 +175,6 @@ class CheckoutController extends Controller
             return response()->json([
                 'clientSecret' => $paymentIntent->client_secret,
             ]);
-
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 400);
         }
