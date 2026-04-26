@@ -29,9 +29,21 @@ class CartController extends Controller
         $cart = Cart::firstOrCreate([
             'client_id'=>auth()->id()
         ]);
-        $cart->items()->create($data);
 
-        return redirect()->back();
+        // Check if product already exists in cart
+        $existingItem = $cart->items()->where('product_id', $data['product_id'])->first();
+
+        if ($existingItem) {
+            // Update quantity instead of creating new item
+            $existingItem->update([
+                'quantity' => $existingItem->quantity + $data['quantity']
+            ]);
+        } else {
+            // Create new cart item
+            $cart->items()->create($data);
+        }
+
+        return redirect()->back()->with('success', 'Product added to cart successfully.');
     }
 
     public function update(UpdateItemsRequest $request,CartItem $item)
@@ -48,5 +60,20 @@ class CartController extends Controller
         $item->delete();
         
         return redirect()->back();
+    }
+
+    public function getCount(): int
+    {
+        if (!auth()->check()) {
+            return 0;
+        }
+
+        $cart = auth()->user()->cart;
+        
+        if (!$cart) {
+            return 0;
+        }
+
+        return $cart->items()->sum('quantity');
     }
 }

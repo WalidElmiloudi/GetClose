@@ -71,7 +71,14 @@
                       class="ph-fill ph-house text-4xl {{ request()->routeIs('home') ? 'text-white' : '' }}"></i></a>
               <a href="{{ route('shops') }}" class="flex justify-center items-center {{ request()->routeIs('shops') ? 'bg-red-500' : '' }} rounded-full m-2"><i class="ph ph-storefront text-4xl {{ request()->routeIs('shops') ? 'text-white' : '' }}"></i></a>
               <a href="{{ route('products') }}" class="flex justify-center items-center {{ request()->routeIs('products') || request()->routeIs('products.show') || request()->routeIs('search') ? 'bg-red-500' : '' }} rounded-full m-2"><i class="ph ph-tag text-4xl {{ request()->routeIs('products') || request()->routeIs('products.show') || request()->routeIs('search') ? 'text-white' : '' }}"></i></a>
-              <a href="{{ route('cart') }}" class="flex justify-center items-center {{ request()->routeIs('cart') ? 'bg-red-500' : '' }} rounded-full m-2"><i class="ph ph-shopping-cart text-4xl {{ request()->routeIs('cart') ? 'text-white' : '' }}"></i></a>
+              <a href="{{ route('cart') }}" class="flex justify-center items-center {{ request()->routeIs('cart') ? 'bg-red-500' : '' }} rounded-full m-2 relative">
+                  <i class="ph ph-shopping-cart text-4xl {{ request()->routeIs('cart') ? 'text-white' : '' }}"></i>
+                  @if($cartCount > 0)
+                      <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center">
+                          {{ $cartCount > 99 ? '99+' : $cartCount }}
+                      </span>
+                  @endif
+              </a>
               <a href="{{ route('profile.view') }}" class="flex justify-center items-center {{ request()->routeIs('profile.*') ? 'bg-red-500' : '' }} rounded-full m-2"><i class="ph ph-user text-4xl {{ request()->routeIs('profile.*') ? 'text-white' : '' }}"></i></a>
           </div>
           <div
@@ -80,7 +87,14 @@
                       class="ph-fill ph-house text-4xl {{ request()->routeIs('home') ? 'text-white' : '' }}"></i></a>
               <a href="{{ route('shops') }}" class="flex justify-center items-center {{ request()->routeIs('shops') ? 'bg-red-500' : '' }} rounded-full m-2"><i class="ph ph-storefront text-4xl {{ request()->routeIs('shops') ? 'text-white' : '' }}"></i></a>
               <a href="{{ route('products') }}" class="flex justify-center items-center {{ request()->routeIs('products') || request()->routeIs('products.show') || request()->routeIs('search') ? 'bg-red-500' : '' }} rounded-full m-2"><i class="ph ph-tag text-4xl {{ request()->routeIs('products') || request()->routeIs('products.show') || request()->routeIs('search') ? 'text-white' : '' }}"></i></a>
-              <a href="{{ route('cart') }}" class="flex justify-center items-center {{ request()->routeIs('cart') ? 'bg-red-500' : '' }} rounded-full m-2"><i class="ph ph-shopping-cart text-4xl {{ request()->routeIs('cart') ? 'text-white' : '' }}"></i></a>
+              <a href="{{ route('cart') }}" class="flex justify-center items-center {{ request()->routeIs('cart') ? 'bg-red-500' : '' }} rounded-full m-2 relative">
+                  <i class="ph ph-shopping-cart text-4xl {{ request()->routeIs('cart') ? 'text-white' : '' }}"></i>
+                  @if($cartCount > 0)
+                      <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center">
+                          {{ $cartCount > 99 ? '99+' : $cartCount }}
+                      </span>
+                  @endif
+              </a>
               <a href="{{ route('profile.view') }}" class="flex justify-center items-center {{ request()->routeIs('profile.*') ? 'bg-red-500' : '' }} rounded-full m-2"><i class="ph ph-user text-4xl {{ request()->routeIs('profile.*') ? 'text-white' : '' }}"></i></a>
           </div>
           <div class="hidden 2xl:grid top-20 h-20 shadow-sm  w-full grid-cols-5 bg-white">
@@ -91,7 +105,14 @@
               <a href="{{ route('products') }}"
                   class="flex justify-center items-center {{ request()->routeIs('products') || request()->routeIs('products.show') || request()->routeIs('search') ? 'bg-red-500 text-white' : 'hover:bg-red-400 hover:text-white' }} rounded-full m-2 text-2xl font-bold ease-in-out duration-150">Products</a>
               <a href="{{ route('cart') }}"
-                  class="flex justify-center items-center {{ request()->routeIs('cart') ? 'bg-red-500 text-white' : 'hover:bg-red-400 hover:text-white' }} rounded-full m-2 text-2xl font-bold ease-in-out duration-150">Cart</a>
+                  class="flex justify-center items-center {{ request()->routeIs('cart') ? 'bg-red-500 text-white' : 'hover:bg-red-400 hover:text-white' }} rounded-full m-2 text-2xl font-bold ease-in-out duration-150 relative">
+                  Cart
+                  @if($cartCount > 0)
+                      <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center">
+                          {{ $cartCount > 99 ? '99+' : $cartCount }}
+                      </span>
+                  @endif
+              </a>
               <a href="{{ route('profile.view') }}"
                   class="flex justify-center items-center {{ request()->routeIs('profile.*') ? 'bg-red-500 text-white' : 'hover:bg-red-400 hover:text-white' }} rounded-full m-2 text-2xl font-bold ease-in-out duration-150">Profile</a>
           </div>
