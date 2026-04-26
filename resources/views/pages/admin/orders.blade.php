@@ -50,7 +50,7 @@
                                     </select>
                                 </form>
                             </td>
-                            <td class="px-6 py-4 text-sm text-gray-500">{{ $order->created_at->format('M d, Y') }}</td>
+                            <td class="px-6 py-4"><a href="{{ route('admin.orders.show', $order) }}" class="text-blue-500 hover:text-blue-700 font-semibold">View Details</a></td>
                         </tr>
                     @endforeach
                 </tbody>

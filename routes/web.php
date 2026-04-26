@@ -107,6 +107,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     // Orders
     Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders');
     Route::put('/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.update-status');
+    Route::get('/orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
     
     // Disputes
     Route::get('/disputes', [AdminDisputeController::class, 'index'])->name('disputes');

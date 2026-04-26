@@ -15,6 +15,12 @@ class OrderController extends Controller
         return view('pages.admin.orders', compact('orders'));
     }
 
+    public function show(Order $order): View
+    {
+        $order->load(['client', 'items.product.shop', 'payment', 'shippingMethod']);
+        return view('pages.admin.order-detail', compact('order'));
+    }
+
     public function updateStatus(Request $request, Order $order)
     {
         $request->validate([
