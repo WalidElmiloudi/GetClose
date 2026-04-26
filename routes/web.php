@@ -80,7 +80,6 @@ Route::middleware('auth')->group(function () {
     
     Route::get('/vendor/orders', [VendorOrderController::class, 'index'])->name('vendor.orders');
     Route::get('/vendor/orders/{order}', [VendorOrderController::class, 'show'])->name('vendor.orders.show');
-    Route::put('/vendor/orders/{order}/status', [VendorOrderController::class, 'updateStatus'])->name('vendor.orders.update-status');
     
     Route::post('/vendor/categories', [CategoryController::class, 'store'])->name('vendor.categories.store');
     Route::delete('/vendor/categories/{category}', [CategoryController::class, 'destroy'])->name('vendor.categories.destroy');

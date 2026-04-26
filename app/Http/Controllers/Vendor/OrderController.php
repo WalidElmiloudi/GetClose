@@ -17,11 +17,11 @@ class OrderController extends Controller
             return redirect()->route('vendor.dashboard')->with('error', 'Create a shop first.');
         }
 
-        $orders = Order::whereHas('items', function($query) use ($shop) {
-                $query->whereHas('product', function($q) use ($shop) {
-                    $q->where('shop_id', $shop->id);
-                });
-            })
+        $orders = Order::whereHas('items', function ($query) use ($shop) {
+            $query->whereHas('product', function ($q) use ($shop) {
+                $q->where('shop_id', $shop->id);
+            });
+        })
             ->with('client')
             ->latest()
             ->paginate(20);
@@ -34,7 +34,7 @@ class OrderController extends Controller
         $shop = auth()->user()->shop;
 
         // Verify order belongs to vendor's shop
-        $hasShopProducts = $order->items()->whereHas('product', function($query) use ($shop) {
+        $hasShopProducts = $order->items()->whereHas('product', function ($query) use ($shop) {
             $query->where('shop_id', $shop->id);
         })->exists();
 
@@ -42,30 +42,9 @@ class OrderController extends Controller
             abort(403);
         }
 
-        $order->load(['client', 'items.product']);
+        // Load with payment and refund info (READ-ONLY)
+        $order->load(['client', 'items.product', 'payment', 'refunds']);
 
         return view('pages.vendor.order-detail', compact('order'));
-    }
-
-    public function updateStatus(Request $request, Order $order)
-    {
-        $shop = auth()->user()->shop;
-
-        // Verify order belongs to vendor's shop
-        $hasShopProducts = $order->items()->whereHas('product', function($query) use ($shop) {
-            $query->where('shop_id', $shop->id);
-        })->exists();
-
-        if (!$hasShopProducts) {
-            abort(403);
-        }
-
-        $request->validate([
-            'status' => 'required|in:pending,paid,processing,partialy_shipped,shipped,completed,cancelled,refunded'
-        ]);
-
-        $order->update(['status' => $request->status]);
-
-        return back()->with('success', 'Order status updated successfully.');
     }
 }
