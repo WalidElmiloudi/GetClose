@@ -12,6 +12,7 @@ use App\Http\Controllers\Vendor\ProductController as VendorProductController;
 use App\Http\Controllers\Vendor\CategoryController;
 use App\Http\Controllers\Vendor\DashboardController as VendorDashboardController;
 use App\Http\Controllers\Vendor\OrderController as VendorOrderController;
+use App\Http\Controllers\Vendor\PayoutController as VendorPayoutController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\ShopController as AdminShopController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
@@ -80,6 +81,13 @@ Route::middleware('auth')->group(function () {
     
     Route::get('/vendor/orders', [VendorOrderController::class, 'index'])->name('vendor.orders');
     Route::get('/vendor/orders/{order}', [VendorOrderController::class, 'show'])->name('vendor.orders.show');
+    
+    // Vendor financial routes
+    Route::get('/vendor/financials', [VendorPayoutController::class, 'dashboard'])->name('vendor.financials');
+    Route::get('/vendor/financials/ledger', [VendorPayoutController::class, 'ledger'])->name('vendor.financials.ledger');
+    Route::get('/vendor/financials/eligibility', [VendorPayoutController::class, 'eligibility'])->name('vendor.financials.eligibility');
+    Route::get('/vendor/payouts', [VendorPayoutController::class, 'index'])->name('vendor.payouts');
+    Route::post('/vendor/payouts/request', [VendorPayoutController::class, 'request'])->name('vendor.payouts.request');
     
     Route::post('/vendor/categories', [CategoryController::class, 'store'])->name('vendor.categories.store');
     Route::delete('/vendor/categories/{category}', [CategoryController::class, 'destroy'])->name('vendor.categories.destroy');

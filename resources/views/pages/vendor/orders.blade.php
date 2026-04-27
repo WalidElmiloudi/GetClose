@@ -34,23 +34,17 @@
                                 <td class="px-6 py-4">{{ $order->client->name }}</td>
                                 <td class="px-6 py-4 font-bold text-red-600">${{ number_format($order->total_price, 2) }}</td>
                                 <td class="px-6 py-4">
-                                    <form action="{{ route('vendor.orders.update-status', $order) }}" method="POST">
-                                        @csrf
-                                        @method('PUT')
-                                        <select name="status" onchange="this.form.submit()" class="px-3 py-1 rounded-full text-xs font-semibold border-0
-                                            @if($order->status == 'completed') bg-green-100 text-green-700
-                                            @elseif($order->status == 'pending') bg-yellow-100 text-yellow-700
-                                            @elseif($order->status == 'cancelled') bg-red-100 text-red-700
-                                            @else bg-blue-100 text-blue-700
-                                            @endif">
-                                            <option value="pending" {{ $order->status == 'pending' ? 'selected' : '' }}>Pending</option>
-                                            <option value="paid" {{ $order->status == 'paid' ? 'selected' : '' }}>Paid</option>
-                                            <option value="processing" {{ $order->status == 'processing' ? 'selected' : '' }}>Processing</option>
-                                            <option value="shipped" {{ $order->status == 'shipped' ? 'selected' : '' }}>Shipped</option>
-                                            <option value="completed" {{ $order->status == 'completed' ? 'selected' : '' }}>Completed</option>
-                                            <option value="cancelled" {{ $order->status == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
-                                        </select>
-                                    </form>
+                                    <span class="px-3 py-1 rounded-full text-xs font-semibold
+                                        @if($order->status == 'completed') bg-green-100 text-green-700
+                                        @elseif($order->status == 'pending') bg-yellow-100 text-yellow-700
+                                        @elseif($order->status == 'cancelled') bg-red-100 text-red-700
+                                        @elseif($order->status == 'paid') bg-blue-100 text-blue-700
+                                        @elseif($order->status == 'processing') bg-purple-100 text-purple-700
+                                        @elseif($order->status == 'refunded') bg-gray-100 text-gray-700
+                                        @else bg-blue-100 text-blue-700
+                                        @endif">
+                                        {{ ucfirst(str_replace('_', ' ', $order->status)) }}
+                                    </span>
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-500">{{ $order->created_at->format('M d, Y') }}</td>
                                 <td class="px-6 py-4">

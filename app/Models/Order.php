@@ -14,8 +14,15 @@ class Order extends Model
         'shipping_city',
         'shipping_zip',
         'payment_method',
+        'paid_at',
+        'refunded_amount',
         'client_id',
         'shipping_method_id'
+    ];
+
+    protected $casts = [
+        'paid_at' => 'datetime',
+        'refunded_amount' => 'decimal:2'
     ];
 
     public function client()
@@ -41,5 +48,10 @@ class Order extends Model
     public function dispute()
     {
         return $this->hasOne(Dispute::class);
+    }
+    
+    public function refunds()
+    {
+        return $this->hasMany(Refund::class);
     }
 }
