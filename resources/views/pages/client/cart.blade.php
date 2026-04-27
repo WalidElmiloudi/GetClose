@@ -26,8 +26,8 @@
                                     <h3 class="text-xl font-bold text-gray-800 mb-2">{{ $item->product->name }}</h3>
                                     <p class="text-gray-600 text-sm mb-3">{{ $item->product->description }}</p>
                                     <div class="flex items-center justify-between">
-                                        <span class="text-2xl font-bold text-red-600">${{ number_format($item->price * $item->quantity, 2) }}</span>
-                                        <span class="text-sm text-gray-500">${{ number_format($item->price, 2) }} each</span>
+                                        <span class="text-2xl font-bold text-red-600">MAD {{ number_format($item->price * $item->quantity, 2) }}</span>
+                                        <span class="text-sm text-gray-500">MAD {{ number_format($item->price, 2) }} each</span>
                                     </div>
                                 </div>
                             </div>

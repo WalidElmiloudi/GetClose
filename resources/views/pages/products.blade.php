@@ -42,36 +42,46 @@
                             <h3 class="text-xl font-bold text-gray-800 mb-2 line-clamp-1">{{ $product->name }}</h3>
                             <p class="text-gray-600 text-sm mb-3 line-clamp-2">{{ $product->description }}</p>
                             <div class="flex items-center justify-between mb-3">
-                                <span class="text-2xl font-bold text-red-600">${{ number_format($product->price, 2) }}</span>
+                                <span class="text-2xl font-bold text-red-600">MAD {{ number_format($product->price, 2) }}</span>
                                 <span class="text-sm text-gray-500">{{ $product->quantity }} left</span>
                             </div>
                             @if($product->status == 'active' && $product->quantity > 0)
-                                @if(auth()->check() && auth()->user()->role === 'client')
-                                    @if($isInCart)
-                                        <!-- Product in cart - Show Remove Button -->
-                                        <form action="{{ route('cart.destroy', $cartItem->id) }}" method="POST" class="mt-3" onclick="event.stopPropagation()">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200">
-                                                <i class="ph-bold ph-trash"></i> Remove from Cart
-                                            </button>
-                                        </form>
-                                    @else
-                                        <!-- Product not in cart - Show Add to Cart Button -->
-                                        <form action="{{ route('cart.store') }}" method="POST" class="mt-3" onclick="event.stopPropagation()">
-                                            @csrf
-                                            <input type="hidden" name="product_id" value="{{ $product->id }}">
-                                            <input type="hidden" name="quantity" value="1">
-                                            <input type="hidden" name="price" value="{{ $product->price }}">
-                                            <button type="submit" class="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200">
-                                                <i class="ph-bold ph-shopping-cart"></i> Add to Cart
-                                            </button>
-                                        </form>
+                                @if(auth()->check())
+                                    @if(auth()->user()->role === 'client')
+                                        @if($isInCart)
+                                            <!-- Product in cart - Show Remove Button -->
+                                            <form action="{{ route('cart.destroy', $cartItem->id) }}" method="POST" class="mt-3" onclick="event.stopPropagation()">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200">
+                                                    <i class="ph-bold ph-trash"></i> Remove from Cart
+                                                </button>
+                                            </form>
+                                        @else
+                                            <!-- Product not in cart - Show Add to Cart Button -->
+                                            <form action="{{ route('cart.store') }}" method="POST" class="mt-3" onclick="event.stopPropagation()">
+                                                @csrf
+                                                <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                                <input type="hidden" name="quantity" value="1">
+                                                <input type="hidden" name="price" value="{{ $product->price }}">
+                                                <button type="submit" class="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200">
+                                                    <i class="ph-bold ph-shopping-cart"></i> Add to Cart
+                                                </button>
+                                            </form>
+                                        @endif
+                                    @elseif(auth()->user()->role === 'vendor')
+                                        <button disabled class="w-full bg-blue-100 text-blue-600 font-semibold py-2 px-4 rounded-lg cursor-not-allowed">
+                                            <i class="ph-bold ph-storefront"></i> Vendor Account
+                                        </button>
+                                    @elseif(auth()->user()->role === 'admin')
+                                        <button disabled class="w-full bg-purple-100 text-purple-600 font-semibold py-2 px-4 rounded-lg cursor-not-allowed">
+                                            <i class="ph-bold ph-shield"></i> Admin Account
+                                        </button>
                                     @endif
                                 @else
-                                    <button disabled class="w-full bg-gray-300 text-gray-600 font-semibold py-2 px-4 rounded-lg cursor-not-allowed">
-                                        Login to Add
-                                    </button>
+                                    <a href="{{ route('login') }}" class="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200 text-center block">
+                                        <i class="ph-bold ph-sign-in"></i> Login to Add
+                                    </a>
                                 @endif
                             @else
                                 <button disabled class="w-full bg-gray-300 text-gray-600 font-semibold py-2 px-4 rounded-lg cursor-not-allowed">

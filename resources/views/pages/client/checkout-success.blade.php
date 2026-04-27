@@ -32,7 +32,7 @@
                             <h3 class="font-semibold text-gray-800">{{ $item->product->name }}</h3>
                             <p class="text-sm text-gray-500">Quantity: {{ $item->quantity }}</p>
                         </div>
-                        <div class="text-xl font-bold text-red-600">${{ number_format($item->price * $item->quantity, 2) }}</div>
+                        <div class="text-xl font-bold text-red-600">MAD {{ number_format($item->price * $item->quantity, 2) }}</div>
                     </div>
                 @endforeach
             </div>
@@ -41,15 +41,15 @@
             <div class="border-t border-gray-200 pt-4 space-y-2">
                 <div class="flex justify-between text-gray-600">
                     <span>Subtotal</span>
-                    <span>${{ number_format($order->total_price - $order->shipping_price, 2) }}</span>
+                    <span>MAD {{ number_format($order->total_price - $order->shipping_price, 2) }}</span>
                 </div>
                 <div class="flex justify-between text-gray-600">
                     <span>Shipping</span>
-                    <span>${{ number_format($order->shipping_price, 2) }}</span>
+                    <span>MAD {{ number_format($order->shipping_price, 2) }}</span>
                 </div>
                 <div class="border-t border-gray-200 pt-2 flex justify-between text-2xl font-bold text-gray-800">
                     <span>Total</span>
-                    <span class="text-red-600">${{ number_format($order->total_price, 2) }}</span>
+                    <span class="text-red-600">MAD {{ number_format($order->total_price, 2) }}</span>
                 </div>
             </div>
         </div>
@@ -75,7 +75,7 @@
                     @if($order->shippingMethod->estimated_days)
                         <p>Estimated delivery: {{ $order->shippingMethod->estimated_days }} days</p>
                     @endif
-                    <p class="text-red-600 font-bold">${{ number_format($order->shipping_price, 2) }}</p>
+                    <p class="text-red-600 font-bold">MAD {{ number_format($order->shipping_price, 2) }}</p>
                 </div>
             </div>
         </div>

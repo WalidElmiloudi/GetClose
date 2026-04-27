@@ -60,8 +60,8 @@
                                             <p class="text-sm text-gray-600">Quantity: {{ $item->quantity }}</p>
                                         </div>
                                         <div class="text-right">
-                                            <p class="font-bold text-gray-800">${{ number_format($item->price * $item->quantity, 2) }}</p>
-                                            <p class="text-sm text-gray-500">${{ number_format($item->price, 2) }} each</p>
+                                            <p class="font-bold text-gray-800">MAD {{ number_format($item->price * $item->quantity, 2) }}</p>
+                                            <p class="text-sm text-gray-500">MAD {{ number_format($item->price, 2) }} each</p>
                                         </div>
                                     </div>
                                 @endforeach
@@ -98,7 +98,7 @@
                                 </div>
                                 <div class="flex justify-between items-center pt-4 border-t border-gray-200">
                                     <span class="text-xl font-bold text-gray-800">Total</span>
-                                    <span class="text-2xl font-bold text-red-600">${{ number_format($order->total_price, 2) }}</span>
+                                    <span class="text-2xl font-bold text-red-600">MAD {{ number_format($order->total_price, 2) }}</span>
                                 </div>
                             </div>
 

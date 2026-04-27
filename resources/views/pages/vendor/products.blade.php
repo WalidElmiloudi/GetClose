@@ -37,7 +37,7 @@
                             <tr>
                                 <td class="px-6 py-4 font-semibold">{{ $product->name }}</td>
                                 <td class="px-6 py-4">{{ $product->category->name }}</td>
-                                <td class="px-6 py-4 font-bold text-red-600">${{ number_format($product->price, 2) }}</td>
+                                <td class="px-6 py-4 font-bold text-red-600">MAD {{ number_format($product->price, 2) }}</td>
                                 <td class="px-6 py-4 {{ $product->quantity <= 5 ? 'text-red-600 font-bold' : '' }}">{{ $product->quantity }}</td>
                                 <td class="px-6 py-4 capitalize">
                                     <span class="px-3 py-1 rounded-full text-xs font-semibold

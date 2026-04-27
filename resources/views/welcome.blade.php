@@ -58,7 +58,7 @@
                         <h3 class="text-lg lg:text-xl font-bold text-gray-800 mb-2 line-clamp-1">{{ $product->name }}</h3>
                         <p class="text-gray-600 text-sm mb-2 line-clamp-2">{{ $product->description }}</p>
                         <div class="flex items-center justify-between">
-                            <span class="text-xl font-bold text-red-600">${{ number_format($product->price, 2) }}</span>
+                            <span class="text-xl font-bold text-red-600">MAD {{ number_format($product->price, 2) }}</span>
                             <span class="text-xs text-gray-500">{{ $product->quantity }} left</span>
                         </div>
                     </div>
@@ -79,7 +79,7 @@
                         <h3 class="text-lg lg:text-xl font-bold text-gray-800 mb-2 line-clamp-1">{{ $product->name }}</h3>
                         <p class="text-gray-600 text-sm mb-2 line-clamp-2">{{ $product->description }}</p>
                         <div class="flex items-center justify-between">
-                            <span class="text-xl font-bold text-red-600">${{ number_format($product->price, 2) }}</span>
+                            <span class="text-xl font-bold text-red-600">MAD {{ number_format($product->price, 2) }}</span>
                             <span class="text-xs text-gray-500">{{ $product->quantity }} left</span>
                         </div>
                     </div>

@@ -75,7 +75,7 @@
                                             @endif
                                         </div>
                                     </div>
-                                    <div class="text-xl font-bold text-red-600">${{ number_format($method->price, 2) }}</div>
+                                    <div class="text-xl font-bold text-red-600">MAD {{ number_format($method->price, 2) }}</div>
                                 </label>
                             @endforeach
                             @error('shipping_method_id')
@@ -144,7 +144,7 @@
                                     <div class="flex-1 min-w-0">
                                         <div class="font-semibold text-gray-800 truncate">{{ $item->product->name }}</div>
                                         <div class="text-sm text-gray-500">Qty: {{ $item->quantity }}</div>
-                                        <div class="text-red-600 font-bold">${{ number_format($item->price * $item->quantity, 2) }}</div>
+                                        <div class="text-red-600 font-bold">MAD {{ number_format($item->price * $item->quantity, 2) }}</div>
                                     </div>
                                 </div>
                             @endforeach
@@ -259,8 +259,6 @@ if (firstChecked) {
 const checkoutForm = document.getElementById('checkout-form');
 const submitButton = document.getElementById('submit-button');
 
-// ... existing code ...
-
 checkoutForm.addEventListener('submit', async function(e) {
     const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
     
@@ -281,8 +279,6 @@ checkoutForm.addEventListener('submit', async function(e) {
             const totalPriceText = document.getElementById('totalPrice').textContent.replace('$', '').replace(',', '');
             const totalAmount = parseFloat(totalPriceText);
             
-            console.log('Creating payment intent for amount:', totalAmount);
-            
             // Create payment intent
             const response = await fetch('{{ route('checkout.create-payment-intent') }}', {
                 method: 'POST',
@@ -296,11 +292,8 @@ checkoutForm.addEventListener('submit', async function(e) {
             const data = await response.json();
             
             if (data.error) {
-                console.error('Payment intent creation failed:', data.error);
                 throw new Error(data.error);
             }
-            
-            console.log('Payment intent created, confirming card payment...');
             
             // Confirm card payment
             const { paymentIntent, error } = await stripe.confirmCardPayment(data.clientSecret, {
@@ -310,30 +303,19 @@ checkoutForm.addEventListener('submit', async function(e) {
             });
             
             if (error) {
-                console.error('Card payment failed:', error);
                 const errorElement = document.getElementById('card-errors');
                 errorElement.textContent = error.message;
                 submitButton.disabled = false;
                 submitButton.textContent = 'Place Order';
             } else {
-                console.log('Payment intent status:', paymentIntent.status);
-                
                 // Payment successful
                 if (paymentIntent.status === 'succeeded') {
-                    console.log('Payment succeeded, submitting form with ID:', paymentIntent.id);
                     document.getElementById('stripe-payment-intent-id').value = paymentIntent.id;
                     // Submit the form
                     checkoutForm.submit();
-                } else {
-                    console.error('Payment did not succeed:', paymentIntent.status);
-                    const errorElement = document.getElementById('card-errors');
-                    errorElement.textContent = 'Payment status: ' + paymentIntent.status + '. Please try again.';
-                    submitButton.disabled = false;
-                    submitButton.textContent = 'Place Order';
                 }
             }
         } catch (error) {
-            console.error('Checkout error:', error);
             const errorElement = document.getElementById('card-errors');
             errorElement.textContent = error.message || 'An error occurred';
             submitButton.disabled = false;
@@ -341,7 +323,5 @@ checkoutForm.addEventListener('submit', async function(e) {
         }
     }
 });
-
-// ... existing code ...
 </script>
 @endsection
