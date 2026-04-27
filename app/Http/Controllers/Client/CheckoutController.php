@@ -20,7 +20,7 @@ class CheckoutController extends Controller
     /**
      * Show checkout page
      */
-    public function index()
+    public function index(): View
     {
         $cart = Cart::where('client_id', auth()->id())
             ->with('items.product')
@@ -111,8 +111,10 @@ class CheckoutController extends Controller
             if ($request->payment_method === 'stripe' && $request->stripe_payment_intent_id) {
                 Payement::create([
                     'order_id' => $order->id,
+                    'user_id' => auth()->id(),
                     'amount' => $totalPrice,
-                    'status' => 'completed',
+                    'status' => 'paid',
+                    'method' => 'stripe',
                     'payment_method' => 'stripe',
                     'transaction_id' => $request->stripe_payment_intent_id,
                 ]);
@@ -136,13 +138,16 @@ class CheckoutController extends Controller
 
             DB::commit();
 
+            // Reload order with relationships for notifications
+            $order->load(['items.product.shop.owner']);
+
             // Send notifications
             $notificationService = new NotificationService();
             $notificationService->notifyOrderPlaced($order);
             $notificationService->notifyAdminNewOrder($order);
             
             // Notify vendors whose products are in the order
-            $vendorIds = $order->items->pluck('product.shop.owner_id')->unique();
+            $vendorIds = $order->items->pluck('product.shop.owner_id')->unique()->filter();
             foreach ($vendorIds as $vendorId) {
                 $notificationService->notifyVendorNewOrder($vendorId, $order);
             }
@@ -151,7 +156,9 @@ class CheckoutController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Failed to process order. Please try again.');
+            \Log::error('Checkout failed: ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
+            return back()->with('error', 'Failed to process order. Please try again. Error: ' . $e->getMessage());
         }
     }
 
