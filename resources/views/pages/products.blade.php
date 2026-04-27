@@ -83,6 +83,11 @@
                     </a>
                 @endforeach
             </div>
+
+            <!-- Pagination -->
+            <div class="mt-12">
+                {{ $products->links() }}
+            </div>
         @else
             <div class="text-center py-20">
                 <i class="ph-fill ph-package text-8xl text-gray-300 mb-4"></i>

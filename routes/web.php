@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Client\ProductController;
 use App\Http\Controllers\Client\CartController;
@@ -23,9 +24,7 @@ use App\Http\Controllers\Admin\ShippingMethodController as AdminShippingControll
 use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-})->name('home');
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // Public routes
 Route::get('/search', [SearchController::class, 'index'])->name('search');
