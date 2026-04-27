@@ -89,6 +89,11 @@
                 <!-- Order Status -->
                 <div class="bg-white rounded-xl shadow-lg p-6">
                     <h2 class="text-2xl font-bold text-gray-800 mb-4">Order Status</h2>
+                    
+                    @php
+                        $canBeRefunded = in_array($order->status, ['paid', 'completed']);
+                    @endphp
+
                     <form action="{{ route('admin.orders.update-status', $order) }}" method="POST">
                         @csrf
                         @method('PUT')
@@ -100,8 +105,24 @@
                             <option value="shipped" {{ $order->status == 'shipped' ? 'selected' : '' }}>Shipped</option>
                             <option value="completed" {{ $order->status == 'completed' ? 'selected' : '' }}>Completed</option>
                             <option value="cancelled" {{ $order->status == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
-                            <option value="refunded" {{ $order->status == 'refunded' ? 'selected' : '' }}>Refunded</option>
+                            @if($canBeRefunded)
+                                <option value="refunded" {{ $order->status == 'refunded' ? 'selected' : '' }}>Refunded</option>
+                            @elseif($order->status == 'refunded')
+                                <option value="refunded" selected>Refunded</option>
+                            @else
+                                <option value="refunded" disabled title="Order must be paid or completed to refund">Refunded (Not Available - Order Not Paid)</option>
+                            @endif
                         </select>
+
+                        @if(!$canBeRefunded && $order->status != 'refunded')
+                            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                                <p class="text-sm text-yellow-800">
+                                    <i class="ph-fill ph-warning"></i> 
+                                    <strong>Note:</strong> Only paid or completed orders can be refunded.
+                                </p>
+                            </div>
+                        @endif
+
                         <button type="submit" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-lg transition-colors duration-200">
                             Update Status
                         </button>

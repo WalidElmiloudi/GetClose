@@ -39,6 +39,7 @@
                                         @if($order->status == 'completed') bg-green-100 text-green-700
                                         @elseif($order->status == 'pending') bg-yellow-100 text-yellow-700
                                         @elseif($order->status == 'cancelled') bg-red-100 text-red-700
+                                        @elseif($order->status == 'refunded') bg-gray-100 text-gray-700
                                         @else bg-blue-100 text-blue-700
                                         @endif">
                                         <option value="pending" {{ $order->status == 'pending' ? 'selected' : '' }}>Pending</option>
@@ -47,6 +48,11 @@
                                         <option value="shipped" {{ $order->status == 'shipped' ? 'selected' : '' }}>Shipped</option>
                                         <option value="completed" {{ $order->status == 'completed' ? 'selected' : '' }}>Completed</option>
                                         <option value="cancelled" {{ $order->status == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                                        @if(in_array($order->status, ['paid', 'completed']) || $order->status == 'refunded')
+                                            <option value="refunded" {{ $order->status == 'refunded' ? 'selected' : '' }}>Refunded</option>
+                                        @else
+                                            <option value="refunded" disabled>Refunded (Not Paid)</option>
+                                        @endif
                                     </select>
                                 </form>
                             </td>

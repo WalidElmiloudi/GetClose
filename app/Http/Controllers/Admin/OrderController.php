@@ -45,12 +45,18 @@ class OrderController extends Controller
 
         // Process refund if order is refunded
         if ($request->status === 'refunded' && $oldStatus !== 'refunded') {
+            // Validate that order was paid before allowing refund
+            if (!in_array($oldStatus, ['paid', 'completed'])) {
+                return back()->with('error', 'Cannot refund an order that was not paid. Only paid or completed orders can be refunded.');
+            }
+
             try {
                 $refundAmount = $order->total_price - $order->refunded_amount;
                 $payoutService = new VendorPayoutService();
                 $payoutService->processRefund($order, $refundAmount, 'full');
             } catch (\Exception $e) {
                 \Log::error("Failed to process vendor refund: " . $e->getMessage());
+                return back()->with('error', 'Failed to process refund: ' . $e->getMessage());
             }
         }
 
