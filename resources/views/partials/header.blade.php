@@ -27,6 +27,15 @@
         @else
             <div class="hidden lg:flex col-span-1 items-center gap-4">
                 <h1 class="hidden lg:block font-bold text-lg">{{auth()->user()->name}}</h1>
+                <!-- Notification Bell -->
+                <a href="{{ route('notifications') }}" class="relative text-gray-600 hover:text-red-500 transition-colors">
+                    <i class="ph-fill ph-bell text-2xl"></i>
+                    @if($notificationCount > 0)
+                        <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                            {{ $notificationCount > 99 ? '99+' : $notificationCount }}
+                        </span>
+                    @endif
+                </a>
                 <form method="POST" action="{{ route('logout') }}" class="h-[90%] w-[50%]">
                     @csrf
                     <button type="submit"

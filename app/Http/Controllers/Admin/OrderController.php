@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Services\NotificationService;
 use App\Services\VendorPayoutService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -31,6 +32,10 @@ class OrderController extends Controller
         ]);
 
         $order->update(['status' => $request->status]);
+
+        // Send notification for order status change
+        $notificationService = new NotificationService();
+        $notificationService->notifyOrderStatusChanged($order, $oldStatus, $request->status);
 
         // Process vendor earnings if order is now paid or completed
         if (in_array($request->status, ['paid', 'completed'])) {

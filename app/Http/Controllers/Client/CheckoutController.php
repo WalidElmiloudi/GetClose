@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Payement;
 use App\Models\ShippingMethod;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
@@ -19,7 +20,7 @@ class CheckoutController extends Controller
     /**
      * Show checkout page
      */
-    public function index(): View
+    public function index()
     {
         $cart = Cart::where('client_id', auth()->id())
             ->with('items.product')
@@ -30,8 +31,8 @@ class CheckoutController extends Controller
         }
 
         $shippingMethods = ShippingMethod::where('is_active', true)->get();
-
-        $subtotal = $cart->items->sum(function ($item) {
+        
+        $subtotal = $cart->items->sum(function($item) {
             return $item->price * $item->quantity;
         });
 
@@ -63,10 +64,10 @@ class CheckoutController extends Controller
         $shippingMethod = ShippingMethod::find($request->shipping_method_id);
 
         // Calculate totals
-        $subtotal = $cart->items->sum(function ($item) {
+        $subtotal = $cart->items->sum(function($item) {
             return $item->price * $item->quantity;
         });
-
+        
         $shippingPrice = $shippingMethod->price;
         $totalPrice = $subtotal + $shippingPrice;
 
@@ -79,17 +80,12 @@ class CheckoutController extends Controller
             try {
                 Stripe::setApiKey(config('services.stripe.secret'));
                 $paymentIntent = PaymentIntent::retrieve($request->stripe_payment_intent_id);
-
-                \Log::info('Stripe Payment Intent Status: ' . $paymentIntent->status);
-                \Log::info('Payment Intent ID: ' . $paymentIntent->id);
-                \Log::info('Payment Amount: ' . $paymentIntent->amount);
-
+                
                 if ($paymentIntent->status !== 'succeeded') {
-                    return back()->with('error', 'Payment not successful. Status: ' . $paymentIntent->status);
+                    return back()->with('error', 'Payment not successful. Please try again.');
                 }
             } catch (\Exception $e) {
-                \Log::error('Stripe Payment Verification Error: ' . $e->getMessage());
-                return back()->with('error', 'Payment verification failed. ' . $e->getMessage());
+                return back()->with('error', 'Payment verification failed. Please try again.');
             }
         }
 
@@ -98,7 +94,7 @@ class CheckoutController extends Controller
 
             // Create order
             $orderStatus = $request->payment_method === 'cash' ? 'pending' : 'paid';
-
+            
             $order = Order::create([
                 'client_id' => auth()->id(),
                 'total_price' => $totalPrice,
@@ -115,10 +111,9 @@ class CheckoutController extends Controller
             if ($request->payment_method === 'stripe' && $request->stripe_payment_intent_id) {
                 Payement::create([
                     'order_id' => $order->id,
-                    'user_id' => auth()->id(),
                     'amount' => $totalPrice,
-                    'status' => 'paid',
-                    'method' => 'stripe',
+                    'status' => 'completed',
+                    'payment_method' => 'stripe',
                     'transaction_id' => $request->stripe_payment_intent_id,
                 ]);
             }
@@ -141,14 +136,22 @@ class CheckoutController extends Controller
 
             DB::commit();
 
-            \Log::info('Order created successfully: ' . $order->id);
+            // Send notifications
+            $notificationService = new NotificationService();
+            $notificationService->notifyOrderPlaced($order);
+            $notificationService->notifyAdminNewOrder($order);
+            
+            // Notify vendors whose products are in the order
+            $vendorIds = $order->items->pluck('product.shop.owner_id')->unique();
+            foreach ($vendorIds as $vendorId) {
+                $notificationService->notifyVendorNewOrder($vendorId, $order);
+            }
 
             return redirect()->route('orders.confirmation', $order)->with('success', 'Order placed successfully!');
+
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::error('Order Creation Failed: ' . $e->getMessage());
-            \Log::error('Exception Trace: ' . $e->getTraceAsString());
-            return back()->with('error', 'Failed to process order. ' . $e->getMessage());
+            return back()->with('error', 'Failed to process order. Please try again.');
         }
     }
 
@@ -163,7 +166,7 @@ class CheckoutController extends Controller
 
         try {
             Stripe::setApiKey(config('services.stripe.secret'));
-
+            
             $paymentIntent = PaymentIntent::create([
                 'amount' => intval($request->amount * 100), // Convert to cents
                 'currency' => 'usd',
@@ -175,6 +178,7 @@ class CheckoutController extends Controller
             return response()->json([
                 'clientSecret' => $paymentIntent->client_secret,
             ]);
+
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 400);
         }
