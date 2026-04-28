@@ -22,7 +22,7 @@ class PayoutController extends Controller
     /**
      * Financial dashboard
      */
-    public function dashboard(): View
+    public function dashboard()
     {
         $shop = auth()->user()->shop;
         if (!$shop) {

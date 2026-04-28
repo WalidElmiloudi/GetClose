@@ -64,7 +64,7 @@
 
                     <!-- Price -->
                     <div class="mb-6">
-                        <span class="text-5xl font-bold text-red-600">${{ number_format($product->price, 2) }}</span>
+                        <span class="text-5xl font-bold text-red-600">MAD {{ number_format($product->price, 2) }}</span>
                     </div>
 
                     <!-- Description -->
@@ -90,68 +90,90 @@
 
                     <!-- Add to Cart (Only for clients) -->
                     @if($product->status == 'active' && $product->quantity > 0)
-                        @if(auth()->check() && auth()->user()->role === 'client')
-                            @php
-                                $isInCart = $cartHelper && $cartHelper->isInCart($product->id);
-                                $cartItem = $isInCart ? $cartHelper->getCartItem($product->id) : null;
-                            @endphp
+                        @auth
+                            @if(auth()->user()->role === 'client')
+                                @php
+                                    $isInCart = isset($cartItems[$product->id]);
+                                    $cartItem = $isInCart ? $cartItems[$product->id] : null;
+                                @endphp
 
-                            @if($isInCart)
-                                <!-- Product is in cart - Show Remove Button -->
-                                <div class="space-y-4">
-                                    <div class="bg-green-50 border border-green-200 rounded-lg p-4">
-                                        <p class="text-green-700 font-semibold">
-                                            <i class="ph-fill ph-check-circle"></i> 
-                                            Added to Cart (Quantity: {{ $cartItem->quantity }})
-                                        </p>
+                                @if($isInCart)
+                                    <!-- Product is in cart - Show Remove Button -->
+                                    <div class="space-y-4">
+                                        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                                            <p class="text-green-700 font-semibold">
+                                                <i class="ph-fill ph-check-circle"></i> 
+                                                Added to Cart (Quantity: {{ $cartItem->quantity }})
+                                            </p>
+                                        </div>
+                                        
+                                        <form action="{{ route('cart.destroy', $cartItem->id) }}" method="POST" class="space-y-4">
+                                            @csrf
+                                            @method('DELETE')
+                                            
+                                            <button type="submit" 
+                                                class="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-4 px-8 rounded-lg transition-colors duration-200 text-lg">
+                                                <i class="ph-bold ph-trash"></i> Remove from Cart
+                                            </button>
+                                        </form>
+                                        
+                                        <a href="{{ route('cart') }}" 
+                                            class="block w-full text-center bg-red-500 hover:bg-red-600 text-white font-bold py-4 px-8 rounded-lg transition-colors duration-200 text-lg">
+                                            <i class="ph-bold ph-shopping-cart"></i> View Cart
+                                        </a>
                                     </div>
-                                    
-                                    <form action="{{ route('cart.destroy', $cartItem->id) }}" method="POST" class="space-y-4">
+                                @else
+                                    <!-- Product not in cart - Show Add to Cart Button -->
+                                    <form action="{{ route('cart.store') }}" method="POST" class="space-y-4">
                                         @csrf
-                                        @method('DELETE')
+                                        <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                        <input type="hidden" name="price" value="{{ $product->price }}">
+                                        
+                                        <div class="flex items-center gap-4">
+                                            <label class="font-semibold text-gray-700">Quantity:</label>
+                                            <input type="number" name="quantity" value="1" min="1" max="{{ $product->quantity }}" 
+                                                class="w-24 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                                        </div>
                                         
                                         <button type="submit" 
-                                            class="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-4 px-8 rounded-lg transition-colors duration-200 text-lg">
-                                            <i class="ph-bold ph-trash"></i> Remove from Cart
+                                            class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-4 px-8 rounded-lg transition-colors duration-200 text-lg">
+                                            <i class="ph-bold ph-shopping-cart"></i> Add to Cart
                                         </button>
                                     </form>
-                                    
-                                    <a href="{{ route('cart') }}" 
-                                        class="block w-full text-center bg-red-500 hover:bg-red-600 text-white font-bold py-4 px-8 rounded-lg transition-colors duration-200 text-lg">
-                                        <i class="ph-bold ph-shopping-cart"></i> View Cart
-                                    </a>
+                                @endif
+                            @elseif(auth()->user()->role === 'vendor')
+                                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
+                                    <p class="text-blue-700 font-semibold">
+                                        <i class="ph-fill ph-info"></i> 
+                                        Vendors cannot purchase products. Go to your <a href="{{ route('vendor.dashboard') }}" class="underline hover:text-blue-900">Dashboard</a> to manage your shop.
+                                    </p>
                                 </div>
-                            @else
-                                <!-- Product not in cart - Show Add to Cart Button -->
-                                <form action="{{ route('cart.store') }}" method="POST" class="space-y-4">
-                                    @csrf
-                                    <input type="hidden" name="product_id" value="{{ $product->id }}">
-                                    <input type="hidden" name="price" value="{{ $product->price }}">
-                                    
-                                    <div class="flex items-center gap-4">
-                                        <label class="font-semibold text-gray-700">Quantity:</label>
-                                        <input type="number" name="quantity" value="1" min="1" max="{{ $product->quantity }}" 
-                                            class="w-24 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
-                                    </div>
-                                    
-                                    <button type="submit" 
-                                        class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-4 px-8 rounded-lg transition-colors duration-200 text-lg">
-                                        <i class="ph-bold ph-shopping-cart"></i> Add to Cart
-                                    </button>
-                                </form>
+                            @elseif(auth()->user()->role === 'admin')
+                                <div class="bg-purple-50 border border-purple-200 rounded-lg p-4 text-center">
+                                    <p class="text-purple-700 font-semibold">
+                                        <i class="ph-fill ph-shield"></i> 
+                                        Administrators cannot purchase products. Go to your <a href="{{ route('admin.dashboard') }}" class="underline hover:text-purple-900">Admin Panel</a> to manage the platform.
+                                    </p>
+                                </div>
                             @endif
                         @else
-                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
-                                <p class="text-blue-700 font-semibold">
-                                    <i class="ph-fill ph-info"></i> 
-                                    @if(auth()->user()->role === 'vendor')
-                                        Vendors cannot purchase products. Go to your <a href="{{ route('vendor.dashboard') }}" class="underline hover:text-blue-900">Dashboard</a> to manage your shop.
-                                    @else
-                                        Administrators cannot purchase products. Go to your <a href="{{ route('admin.dashboard') }}" class="underline hover:text-blue-900">Admin Panel</a> to manage the platform.
-                                    @endif
-                                </p>
+                            <!-- Not authenticated - Show Login Prompt -->
+                            <div class="space-y-4">
+                                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
+                                    <i class="ph-fill ph-sign-in text-4xl text-yellow-600 mb-3"></i>
+                                    <p class="text-yellow-800 font-semibold text-lg mb-2">Login to Purchase</p>
+                                    <p class="text-yellow-700 mb-4">Create an account or login to add this product to your cart</p>
+                                    <div class="flex gap-3 justify-center">
+                                        <a href="{{ route('login') }}" class="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-200">
+                                            <i class="ph-bold ph-sign-in"></i> Login
+                                        </a>
+                                        <a href="{{ route('register') }}" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-200">
+                                            <i class="ph-bold ph-user-plus"></i> Register
+                                        </a>
+                                    </div>
+                                </div>
                             </div>
-                        @endif
+                        @endauth
                     @else
                         <button disabled class="w-full bg-gray-300 text-gray-600 font-bold py-4 px-8 rounded-lg cursor-not-allowed text-lg">
                             Unavailable
@@ -192,7 +214,7 @@
 
             <!-- Write Review Form -->
             @auth
-                @if(!$product->reviews->where('user_id', auth()->id())->count())
+                @if(auth()->user()->role === 'client' && !$product->reviews->where('user_id', auth()->id())->count())
                     <div class="mb-8 p-6 bg-gray-50 rounded-lg">
                         <h3 class="text-xl font-bold text-gray-800 mb-4">Write a Review</h3>
                         <form action="{{ route('products.review.store', $product) }}" method="POST">
@@ -218,6 +240,16 @@
                         </form>
                     </div>
                 @endif
+            @else
+                <!-- Not authenticated - Show Login Prompt for Reviews -->
+                <div class="mb-8 p-6 bg-yellow-50 border border-yellow-200 rounded-lg text-center">
+                    <i class="ph-fill ph-star text-4xl text-yellow-600 mb-3"></i>
+                    <h3 class="text-xl font-bold text-yellow-800 mb-2">Share Your Experience</h3>
+                    <p class="text-yellow-700 mb-4">Login to write a review for this product</p>
+                    <a href="{{ route('login') }}" class="inline-block bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg transition-colors">
+                        <i class="ph-bold ph-sign-in"></i> Login to Review
+                    </a>
+                </div>
             @endauth
 
             <!-- Reviews List -->
@@ -263,7 +295,7 @@
                                 @endif
                             </div>
                             <h3 class="font-semibold text-gray-800 mb-1 line-clamp-1">{{ $related->name }}</h3>
-                            <p class="text-red-600 font-bold">${{ number_format($related->price, 2) }}</p>
+                            <p class="text-red-600 font-bold">MAD {{ number_format($related->price, 2) }}</p>
                         </a>
                     @endforeach
                 </div>

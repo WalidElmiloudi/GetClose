@@ -29,7 +29,7 @@ class ProductController extends Controller
     public function show(Product $product): View
     {
         $product->load(['shop.owner', 'category', 'reviews.user']);
-        
+
         // Calculate average rating
         $averageRating = $product->reviews()->avg('rating');
         $ratingBreakdown = [
@@ -39,19 +39,31 @@ class ProductController extends Controller
             2 => $product->reviews()->where('rating', 2)->count(),
             1 => $product->reviews()->where('rating', 1)->count(),
         ];
-        
+
         // Get related products from same shop
         $relatedProducts = Product::where('shop_id', $product->shop_id)
             ->where('id', '!=', $product->id)
             ->where('status', 'active')
             ->limit(4)
             ->get();
-        
+            
+        // Get cart items if user is authenticated client
+        $cartItems = [];
+        if (auth()->check() && auth()->user()->role === 'client') {
+            $cart = \App\Models\Cart::where('client_id', auth()->id())->with('items')->first();
+            if ($cart) {
+                foreach ($cart->items as $item) {
+                    $cartItems[$item->product_id] = $item;
+                }
+            }
+        }
+
         return view('pages.products.show', compact(
             'product',
             'averageRating',
             'ratingBreakdown',
-            'relatedProducts'
+            'relatedProducts',
+            'cartItems'
         ));
     }
 
